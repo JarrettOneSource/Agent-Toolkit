@@ -36,4 +36,8 @@ CRAP score, mutation survival, duplication, static typing, and shell complexity 
 
 ## Client update limits
 
-Startup-update behavior was verified against the exact Codex release source and current Claude documentation. Desktop and IDE startup behavior depends on their bundled backend version. Background refresh does not guarantee that an already-started session has the latest skill inventory. See [the distribution research](distribution-research.md).
+A GitHub-backed test installation was seeded from the repository's older `0.1.0` revision, then configured to track `main` while retaining the old installed snapshot. Starting the stock Codex app server refreshed the installed plugin to `0.1.1` and loaded all 21 skills from the new cache. No manual upgrade command was run.
+
+The published implementation also passed [GitHub Actions on Python 3.11 and 3.12](https://github.com/JarrettOneSource/Agent-Toolkit/actions/runs/33929439461).
+
+Claude's update behavior was verified against current documentation. Desktop and IDE startup behavior depends on their bundled backend version. Background refresh does not guarantee that an already-started session has the latest skill inventory. See [the distribution research](distribution-research.md).
