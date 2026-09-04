@@ -1,6 +1,6 @@
 {
   "name": "local-tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
   "author": {
     "name": "JarrettOneSource",
@@ -18,5 +18,22 @@
     "capabilities": [],
     "defaultPrompt": "Help me use Local Tools."
   },
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "local_tools": {
+      "command": "python3",
+      "env": {
+        "LOCAL_TOOLS_MCP_AWAIT_OPEN_BROWSER": "0"
+      },
+      "args": [
+        "scripts/run.py"
+      ],
+      "cwd": ".",
+      "startup_timeout_sec": 30,
+      "tool_timeout_sec": 604800,
+      "omit_tools_from": [
+        "code_mode",
+        "deferred"
+      ]
+    }
+  }
 }

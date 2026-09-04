@@ -1,5 +1,6 @@
 import json
 import shlex
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -10,6 +11,55 @@ from local_tools_mcp import jobs, server
 
 
 class JobLifecycleTests(unittest.TestCase):
+    def unwatched_process(self) -> subprocess.Popen:
+        process = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(20)"], start_new_session=True
+        )
+
+        def cleanup() -> None:
+            if process.poll() is None:
+                process.terminate()
+            process.wait(timeout=3)
+
+        self.addCleanup(cleanup)
+        jobs.JOBS["wait-failure"] = {"job_id": "wait-failure", "status": "running", "pid": process.pid}
+        jobs.PROCESSES["wait-failure"] = process
+        return process
+
+    def test_wait_error_is_recorded_and_process_terminated_before_finalizing(self) -> None:
+        process = self.unwatched_process()
+        original_wait = process.wait
+        calls = 0
+
+        def fail_once(*args, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise OSError("wait failed")
+            return original_wait(*args, **kwargs)
+
+        with mock.patch.object(process, "wait", side_effect=fail_once):
+            jobs.watcher("wait-failure", process, [], None)
+        self.assertEqual(jobs.JOBS["wait-failure"]["status"], "failed")
+        self.assertEqual(jobs.JOBS["wait-failure"]["error"], "wait failed")
+        self.assertIsNotNone(process.poll())
+        self.assertNotIn("wait-failure", jobs.PROCESSES)
+
+    def test_failed_termination_keeps_the_live_process_tracked(self) -> None:
+        process = self.unwatched_process()
+        with (
+            mock.patch.object(process, "wait", side_effect=OSError("wait failed")),
+            mock.patch.object(
+                jobs, "terminate_process_group", side_effect=PermissionError("termination failed")
+            ),
+        ):
+            with self.assertRaisesRegex(PermissionError, "termination failed"):
+                jobs.watcher("wait-failure", process, [], None)
+        self.assertEqual(jobs.JOBS["wait-failure"]["status"], "running")
+        self.assertEqual(jobs.JOBS["wait-failure"]["error"], "wait failed")
+        self.assertIs(jobs.PROCESSES["wait-failure"], process)
+        self.assertIsNone(process.poll())
+
     def setUp(self) -> None:
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)

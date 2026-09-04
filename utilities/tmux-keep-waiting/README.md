@@ -18,7 +18,10 @@ a three-second cooldown between actions in each pane.
 
 ## Run
 
+From the Agent Toolkit repository root, enter the utility directory first. The remaining commands on this page run from that directory:
+
 ```sh
+cd utilities/tmux-keep-waiting
 ./tmux-keep-waiting
 ```
 
@@ -46,7 +49,7 @@ TMUX_KEEP_WAIT_SOCKET=/path/to/tmux/socket TMUX_KEEP_WAIT_SESSION=main ./tmux-ke
 
 ## Install as a user service
 
-From the repository directory:
+From the utility directory:
 
 ```sh
 install -Dm755 tmux-keep-waiting "$HOME/bin/tmux-keep-waiting"

@@ -99,31 +99,13 @@ Research limits: native startup behavior was verified in exact Codex release sou
 
 ## Local Tools MCP packaging follow-up
 
-One shared `.mcp.json` can carry both clients' settings with the inspected client versions:
+Use client-specific MCP entries in the two plugin manifests, pointing to one shared Python implementation:
 
-```json
-{
-  "mcpServers": {
-    "local_tools": {
-      "command": "python3",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/run.py"],
-      "env": {"LOCAL_TOOLS_MCP_AWAIT_OPEN_BROWSER": "0"},
-      "startup_timeout_sec": 30,
-      "tool_timeout_sec": 604800,
-      "omit_tools_from": ["code_mode", "deferred"],
-      "tools": {"await_instruction": {"approval_mode": "auto"}},
-      "timeout": 604800000
-    }
-  }
-}
-```
+- Codex's manifest declares its MCP entry inline. Its command is `python3`, arguments are `scripts/run.py`, and `cwd` is `.`. Codex resolves relative `cwd` against the installed plugin directory. Its native parser does not expand Claude's plugin-root placeholder in command arguments. This distinction was confirmed by a failing native startup followed by successful startup with a plugin-relative working directory. [Native normalization implementation](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/codex-mcp/src/plugin_config.rs#L236-L291)
+- Claude's manifest declares its MCP entry inline. Its arguments use `${CLAUDE_PLUGIN_ROOT}/scripts/run.py`, the client's documented installed-plugin path. [Claude plugin environment variables](https://code.claude.com/docs/en/plugins-reference#environment-variables)
 
-**Codex:** its native plugin MCP parser passes the server object to the ordinary `McpServerConfig` deserializer. `startup_timeout_sec`, `tool_timeout_sec`, `omit_tools_from`, and per-tool `approval_mode` are consequently honored, while Claude's unrecognized `timeout` field is ignored. This applies to native `.codex-plugin/plugin.json` packages; the separate Agent Plugins 1.0 parser has different normalization rules. `auto` means normal approval policy, not unconditional approval; accepted modes also include `prompt`, `writes`, and `approve`. [Native plugin parser](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/codex-mcp/src/plugin_config.rs#L124-L164), [server and per-tool configuration](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/config/src/mcp_types.rs#L75-L85)
+Codex's `startup_timeout_sec: 30`, `tool_timeout_sec: 604800`, and `omit_tools_from: ["code_mode", "deferred"]` are regular native MCP configuration. The omission list keeps long-running tools directly callable, including in code-mode-only sessions, without a global namespace override. The default tool namespace is `mcp__local_tools`. [Configuration parser](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/codex-mcp/src/plugin_config.rs#L125-L161), [exposure mapping](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/core/src/tools/spec_plan.rs#L197-L266), [upstream integration coverage](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/core/tests/suite/code_mode.rs#L854-L1048)
 
-`omit_tools_from: ["code_mode", "deferred"]` keeps this server directly callable, including in code-mode-only sessions, without asking users to modify a global namespace list. Upstream has integration coverage for these combinations. [Exposure mapping](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/core/src/tools/spec_plan.rs#L197-L266), [integration tests](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/core/tests/suite/code_mode.rs#L854-L1048)
+Claude uses a per-server `timeout` in milliseconds: `604800000` is one week and raises the idle-timeout floor for intentionally silent waits. A variable placed inside the MCP child's environment would not configure the parent client's tool timeout. [Claude MCP timeout behavior](https://code.claude.com/docs/en/mcp)
 
-If documenting `code_mode.direct_only_tool_namespaces` anyway, the default namespace is **`mcp__local_tools`**. Native plugin loading preserves the declared server name; it does not prepend the plugin name. The experimental non-prefixed-MCP feature can make it `local_tools`, another reason to prefer the per-server exposure field. [Plugin server loading](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/core-plugins/src/loader.rs#L1529-L1586), [tool namespace construction](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/codex-mcp/src/rmcp_client.rs#L816-L824), [optional prefixing](https://github.com/openai/codex/blob/rust-v0.153.3/codex-rs/codex-mcp/src/tools.rs#L105-L142)
-
-**Claude:** use its per-server **`timeout` in milliseconds**, so `604800000` is one week. Current docs say this also raises that server's idle-timeout floor, important for `await_instruction` calls that intentionally produce no output. Setting `MCP_TOOL_TIMEOUT` inside the child's `env` would not configure the parent client's timeout; the per-server field avoids a global change. [Claude MCP timeout behavior](https://code.claude.com/docs/en/mcp)
-
-Isolated Claude 2.1.261 validation succeeded with all fields above: `claude mcp add-json` under a temporary `CLAUDE_CONFIG_DIR` accepted the configuration and saved the standard command/args/env plus `timeout`, stripping the Codex-specific fields. `claude plugin validate --strict --json` also returned no errors or warnings for a fixture referencing that shared MCP file. The latter validates plugin structure, so the MCP schema roundtrip is the stronger evidence. No real user configuration was changed. The fixture's intentionally nonexistent server script did not connect; these are parser checks, not an end-to-end utility test.
+The separate client configurations avoid relying on unknown-key tolerance or a placeholder expansion that one client does not implement. `tests/test_codex_plugin.py` verifies actual installed-plugin startup, rather than only validating manifest syntax. It runs in isolated client state and creates no model turn.

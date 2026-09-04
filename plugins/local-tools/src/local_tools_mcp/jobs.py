@@ -10,7 +10,9 @@ import time
 import uuid
 from collections import deque
 from pathlib import Path
-from typing import Any
+from typing import TextIO
+
+from .json_types import JsonObject
 
 DEFAULT_JOB_ROOT = Path.home() / ".codex" / "local-tools" / "jobs"
 
@@ -33,7 +35,7 @@ JOB_CONDITION = threading.Condition(LOCK)
 FILE_LOCK = threading.RLock()
 
 
-JOBS: dict[str, dict[str, Any]] = {}
+JOBS: dict[str, JsonObject] = {}
 
 
 PROCESSES: dict[str, subprocess.Popen[str]] = {}
@@ -126,7 +128,7 @@ def write_combined(job_id: str, stream_name: str, line: str) -> None:
             JOB_CONDITION.notify_all()
 
 
-def stream_reader(job_id: str, stream_name: str, stream: Any, output_path: str) -> None:
+def stream_reader(job_id: str, stream_name: str, stream: TextIO, output_path: str) -> None:
     try:
         with open(output_path, "a", encoding="utf-8", errors="replace") as output:
             for line in iter(stream.readline, ""):
@@ -213,8 +215,12 @@ def watcher(
                 timed_out = True
                 terminate_process_group(proc.pid, grace_seconds=5.0)
                 exit_code = proc.wait()
-    except Exception:
-        exit_code = proc.poll()
+    except (OSError, subprocess.SubprocessError) as exc:
+        with LOCK:
+            JOBS[job_id]["error"] = str(exc)
+            save_jobs()
+        terminate_process_group(proc.pid, grace_seconds=5.0)
+        exit_code = proc.wait()
 
     for thread in threads:
         thread.join(timeout=2.0)
@@ -232,8 +238,8 @@ def start_process_job(
     env_update: dict[str, str] | None,
     kind: str,
     max_runtime_seconds: float | None,
-    origin: dict[str, Any] | None = None,
-) -> dict[str, Any]:
+    origin: JsonObject | None = None,
+) -> JsonObject:
     ensure_storage()
     job_id = f"job_{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}_{uuid.uuid4().hex[:10]}"
     paths = job_paths(job_id)
@@ -242,7 +248,7 @@ def start_process_job(
         Path(paths[key]).touch()
 
     now = utc_now()
-    metadata: dict[str, Any] = {
+    metadata: JsonObject = {
         "job_id": job_id,
         "kind": kind,
         "command": command,
@@ -336,7 +342,7 @@ def start_process_job(
     return metadata.copy()
 
 
-def refresh_job(job_id: str) -> dict[str, Any]:
+def refresh_job(job_id: str) -> JsonObject:
     with LOCK:
         if job_id not in JOBS:
             raise ValueError(f"unknown job_id: {job_id}")
@@ -368,14 +374,14 @@ def refresh_job(job_id: str) -> dict[str, Any]:
     return job_payload(job_id)
 
 
-def job_payload(job_id: str) -> dict[str, Any]:
+def job_payload(job_id: str) -> JsonObject:
     with LOCK:
         if job_id not in JOBS:
             raise ValueError(f"unknown job_id: {job_id}")
         return dict(JOBS[job_id])
 
 
-def read_lines(path: str, *, lines: int, since_line: int | None = None) -> dict[str, Any]:
+def read_lines(path: str, *, lines: int, since_line: int | None = None) -> JsonObject:
     if lines < 0:
         raise ValueError("lines must be non-negative")
     p = Path(path)
@@ -418,7 +424,7 @@ def read_lines(path: str, *, lines: int, since_line: int | None = None) -> dict[
     }
 
 
-def collect_tails(job_id: str, tail_lines: int) -> dict[str, Any]:
+def collect_tails(job_id: str, tail_lines: int) -> JsonObject:
     metadata = refresh_job(job_id)
     return {
         "job": metadata,
@@ -428,7 +434,7 @@ def collect_tails(job_id: str, tail_lines: int) -> dict[str, Any]:
     }
 
 
-def collect_monitor_tail(job_id: str, tail_lines: int) -> dict[str, Any]:
+def collect_monitor_tail(job_id: str, tail_lines: int) -> JsonObject:
     metadata = refresh_job(job_id)
     return {
         "job": metadata,
@@ -442,7 +448,7 @@ def wait_for_job(
     timeout_seconds: float,
     cancel_on_timeout: bool,
     tail_lines: int,
-) -> dict[str, Any]:
+) -> JsonObject:
     deadline = time.monotonic() + timeout_seconds
     wait_timed_out = False
 
@@ -473,7 +479,7 @@ def wait_for_job(
     return payload
 
 
-def cancel_job_internal(job_id: str, *, grace_seconds: float, reason: str = "cancel") -> dict[str, Any]:
+def cancel_job_internal(job_id: str, *, grace_seconds: float, reason: str = "cancel") -> JsonObject:
     metadata = refresh_job(job_id)
     if metadata.get("status") in TERMINAL_STATUSES:
         return metadata

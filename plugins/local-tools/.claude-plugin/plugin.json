@@ -1,6 +1,6 @@
 {
   "name": "local-tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
   "author": {
     "name": "JarrettOneSource",
@@ -8,5 +8,17 @@
   },
   "homepage": "https://github.com/JarrettOneSource/Agent-Toolkit",
   "repository": "https://github.com/JarrettOneSource/Agent-Toolkit",
-  "license": "MIT"
+  "license": "MIT",
+  "mcpServers": {
+    "local_tools": {
+      "command": "python3",
+      "env": {
+        "LOCAL_TOOLS_MCP_AWAIT_OPEN_BROWSER": "0"
+      },
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/run.py"
+      ],
+      "timeout": 604800000
+    }
+  }
 }

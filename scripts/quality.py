@@ -5,15 +5,13 @@ import ast
 from pathlib import Path
 
 from cognitive_complexity.api import get_cognitive_complexity
-from radon.complexity import cc_visit
+from radon.complexity import add_inner_blocks, cc_visit
 from radon.metrics import h_visit
 
 
 def measurements(path: Path) -> tuple[int, int, int, float]:
     source = path.read_text()
-    blocks = cc_visit(source)
-    for block in list(blocks):
-        blocks.extend(getattr(block, "methods", []))
+    blocks = add_inner_blocks(cc_visit(source))
     cyclomatic = max((block.complexity for block in blocks), default=0)
     functions = (
         node

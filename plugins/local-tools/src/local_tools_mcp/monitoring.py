@@ -6,10 +6,10 @@ import subprocess
 import threading
 import time
 from collections import deque
-from typing import Any
 
 from . import jobs as job_store
 from . import protocol, validation
+from .json_types import JsonObject, JsonValue
 
 MONITOR_NOTIFICATION_MAX_CHARS = 12_000
 
@@ -20,7 +20,7 @@ MONITOR_NOTIFICATION_RETRY_DELAYS = (0.0, 0.5, 2.0)
 MONITOR_DELIVERY_LOCK = threading.Lock()
 
 
-def capture_monitor_origin(request_meta: Any) -> dict[str, str | None]:
+def capture_monitor_origin(request_meta: JsonValue) -> dict[str, str | None]:
     thread_id = None
     if isinstance(request_meta, dict):
         raw_thread_id = request_meta.get("threadId")
@@ -37,7 +37,7 @@ def capture_monitor_origin(request_meta: Any) -> dict[str, str | None]:
     }
 
 
-def update_monitor_notification(job_id: str, **changes: Any) -> None:
+def update_monitor_notification(job_id: str, **changes: JsonValue) -> None:
     with job_store.JOB_CONDITION:
         metadata = job_store.JOBS.get(job_id)
         if metadata is None:
@@ -132,7 +132,7 @@ def read_monitor_event_lines(
     return body, omitted_lines, omitted_chars
 
 
-def monitor_status_text(metadata: dict[str, Any]) -> str:
+def monitor_status_text(metadata: JsonObject) -> str:
     status = str(metadata.get("status") or "unknown")
     exit_code = metadata.get("exit_code")
     if isinstance(exit_code, int):
@@ -141,7 +141,7 @@ def monitor_status_text(metadata: dict[str, Any]) -> str:
 
 
 def format_monitor_notification(
-    metadata: dict[str, Any],
+    metadata: JsonObject,
     *,
     start_line: int,
     end_line: int,
@@ -193,7 +193,7 @@ def queue_codex_message(thread_id: str, message: str) -> None:
 
 
 def deliver_monitor_notification(
-    metadata: dict[str, Any],
+    metadata: JsonObject,
     message: str,
     *,
     next_line: int,
@@ -286,7 +286,7 @@ def start_monitor_notification_worker(job_id: str, initial_line: int, tail_lines
     ).start()
 
 
-def monitor_tool(arguments: Any, request_meta: Any = None) -> dict[str, Any]:
+def monitor_tool(arguments: JsonValue, request_meta: JsonValue = None) -> JsonObject:
     args = validation.parse_arguments(arguments)
     parsed = validation.parse_command_tool_args(args)
     max_runtime = validation.parse_seconds(

@@ -4,11 +4,11 @@ import json
 import sys
 import threading
 import time
-from typing import Any
 
 from . import jobs as job_store
 from . import monitoring, protocol, validation
 from .await_instruction import AwaitInstructionCancelled, start_instruction_dashboard, wait_for_instruction
+from .json_types import JsonObject, JsonValue
 
 SERVER_VERSION = "0.8.0"
 
@@ -22,17 +22,17 @@ IN_FLIGHT_LOCK = threading.Lock()
 IN_FLIGHT_AWAITS: dict[str | int, threading.Event] = {}
 
 
-def write_message(message: dict[str, Any]) -> None:
+def write_message(message: JsonObject) -> None:
     with WRITE_LOCK:
         sys.stdout.write(json.dumps(message, separators=(",", ":")) + "\n")
         sys.stdout.flush()
 
 
 def await_instruction_tool(
-    arguments: Any,
-    request_meta: Any,
+    arguments: JsonValue,
+    request_meta: JsonValue,
     cancellation_event: threading.Event | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     args = validation.parse_arguments(arguments)
     unknown_arguments = sorted(set(args) - {"comment"})
     if unknown_arguments:
@@ -53,13 +53,13 @@ def await_instruction_tool(
     return protocol.tool_result(payload["instruction"], payload)
 
 
-def request_id(value: Any) -> str | int | None:
+def request_id(value: JsonValue) -> str | int | None:
     if isinstance(value, bool) or not isinstance(value, (str, int)):
         return None
     return value
 
 
-def register_await_request(request: dict[str, Any]) -> tuple[str | int, threading.Event] | None:
+def register_await_request(request: JsonObject) -> tuple[str | int, threading.Event] | None:
     params = request.get("params")
     if not isinstance(params, dict) or params.get("name") != "await_instruction":
         return None
@@ -72,7 +72,7 @@ def register_await_request(request: dict[str, Any]) -> tuple[str | int, threadin
     return parsed_request_id, cancellation_event
 
 
-def cancel_await_request(params: Any) -> None:
+def cancel_await_request(params: JsonValue) -> None:
     if not isinstance(params, dict):
         return
     cancelled_request_id = request_id(params.get("requestId"))
@@ -95,7 +95,7 @@ def finish_await_request(
         return not cancellation_event.is_set()
 
 
-def sleep_tool(arguments: Any) -> dict[str, Any]:
+def sleep_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     seconds = validation.parse_seconds(
         args.get("seconds"), default=validation.DEFAULT_SLEEP_SECONDS, field="seconds"
@@ -123,7 +123,7 @@ def sleep_tool(arguments: Any) -> dict[str, Any]:
     )
 
 
-def start_job_tool(arguments: Any) -> dict[str, Any]:
+def start_job_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     parsed = validation.parse_command_tool_args(args)
     max_runtime = validation.parse_seconds(
@@ -138,7 +138,7 @@ def start_job_tool(arguments: Any) -> dict[str, Any]:
     return protocol.tool_result(text, payload)
 
 
-def run_shell_tool(arguments: Any) -> dict[str, Any]:
+def run_shell_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     parsed = validation.parse_command_tool_args(args)
     timeout = validation.parse_seconds(
@@ -158,7 +158,7 @@ def run_shell_tool(arguments: Any) -> dict[str, Any]:
     return protocol.tool_result(text, payload)
 
 
-def wait_job_tool(arguments: Any) -> dict[str, Any]:
+def wait_job_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     job_id = validation.parse_job_id(args)
     timeout = validation.parse_seconds(
@@ -190,7 +190,7 @@ def wait_job_tool(arguments: Any) -> dict[str, Any]:
     return protocol.tool_result(text, payload)
 
 
-def status_job_tool(arguments: Any) -> dict[str, Any]:
+def status_job_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     job_id = validation.parse_job_id(args)
     tail_lines = validation.parse_int(args.get("tail_lines"), default=20, field="tail_lines")
@@ -199,7 +199,7 @@ def status_job_tool(arguments: Any) -> dict[str, Any]:
     return protocol.tool_result(f"Job {job_id} status is {job['status']}.", payload)
 
 
-def tail_job_tool(arguments: Any) -> dict[str, Any]:
+def tail_job_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     job_id = validation.parse_job_id(args)
     stream = validation.parse_string(args.get("stream"), default="combined", field="stream")
@@ -222,7 +222,7 @@ def tail_job_tool(arguments: Any) -> dict[str, Any]:
     )
 
 
-def cancel_job_tool(arguments: Any) -> dict[str, Any]:
+def cancel_job_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     job_id = validation.parse_job_id(args)
     grace_seconds = validation.parse_seconds(args.get("grace_seconds"), default=5.0, field="grace_seconds")
@@ -241,7 +241,7 @@ def cancel_job_tool(arguments: Any) -> dict[str, Any]:
     return protocol.tool_result(text, payload)
 
 
-def list_jobs_tool(arguments: Any) -> dict[str, Any]:
+def list_jobs_tool(arguments: JsonValue) -> JsonObject:
     args = validation.parse_arguments(arguments)
     limit = validation.parse_int(args.get("limit"), default=20, field="limit", minimum=1, maximum=500)
     status_filter = args.get("status")
@@ -278,8 +278,8 @@ TOOL_HANDLERS = {
 
 
 def call_tool(
-    request_id: Any, params: Any, cancellation_event: threading.Event | None
-) -> dict[str, Any] | None:
+    request_id: JsonValue, params: JsonValue, cancellation_event: threading.Event | None
+) -> JsonObject | None:
     if not isinstance(params, dict):
         return protocol.error(request_id, -32602, "params must be an object")
     name = params.get("name")
@@ -310,9 +310,9 @@ def call_tool(
 
 
 def handle_request(
-    request: dict[str, Any],
+    request: JsonObject,
     cancellation_event: threading.Event | None = None,
-) -> dict[str, Any] | None:
+) -> JsonObject | None:
     request_id = request.get("id")
     method = request.get("method")
     params = request.get("params") or {}
@@ -370,7 +370,7 @@ def handle_request(
 
 
 def handle_and_write_request(
-    request: dict[str, Any],
+    request: JsonObject,
     in_flight_await: tuple[str | int, threading.Event] | None = None,
 ) -> None:
     should_write_response = True

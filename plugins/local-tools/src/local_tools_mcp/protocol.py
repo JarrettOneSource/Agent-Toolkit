@@ -1,30 +1,29 @@
 from __future__ import annotations
 
-from typing import Any
-
 from . import validation
+from .json_types import JsonObject, JsonValue
 
 
-def success(request_id: Any, result: dict[str, Any]) -> dict[str, Any]:
+def success(request_id: JsonValue, result: JsonObject) -> JsonObject:
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
 
 
-def error(request_id: Any, code: int, message: str) -> dict[str, Any]:
+def error(request_id: JsonValue, code: int, message: str) -> JsonObject:
     return {"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}}
 
 
-def tool_result(text: str, payload: dict[str, Any]) -> dict[str, Any]:
+def tool_result(text: str, payload: JsonObject) -> JsonObject:
     return {"content": [{"type": "text", "text": text}], "structuredContent": payload}
 
 
 def tool_schema(
     name: str,
     description: str,
-    properties: dict[str, Any],
+    properties: JsonObject,
     *,
     required: list[str] | None = None,
-) -> dict[str, Any]:
-    schema: dict[str, Any] = {
+) -> JsonObject:
+    schema: JsonObject = {
         "type": "object",
         "properties": properties,
         "additionalProperties": False,

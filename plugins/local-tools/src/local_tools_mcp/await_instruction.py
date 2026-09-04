@@ -19,8 +19,9 @@ import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
 from urllib.parse import parse_qs, quote, urlencode, urlsplit
+
+from .json_types import JsonObject, JsonValue
 
 SERVICE_NAME = "local-tools-mcp-await-instruction"
 DEFAULT_HOST = "127.0.0.1"
@@ -54,7 +55,7 @@ def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
-def format_waiting_since(value: Any) -> str:
+def format_waiting_since(value: JsonValue) -> str:
     if not isinstance(value, str):
         return "Unknown"
     try:
@@ -166,7 +167,7 @@ def ensure_control_root(root: Path) -> None:
         pass
 
 
-def write_json(path: Path, payload: dict[str, Any], *, exclusive: bool = False) -> bool:
+def write_json(path: Path, payload: JsonObject, *, exclusive: bool = False) -> bool:
     encoded = (json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n").encode("utf-8")
     temp_path = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
     descriptor = os.open(temp_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -188,7 +189,7 @@ def write_json(path: Path, payload: dict[str, Any], *, exclusive: bool = False) 
             pass
 
 
-def read_json(path: Path) -> dict[str, Any] | None:
+def read_json(path: Path) -> JsonObject | None:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
@@ -203,7 +204,7 @@ def safe_unlink(path: Path) -> None:
         pass
 
 
-def process_exists(pid: Any) -> bool:
+def process_exists(pid: JsonValue) -> bool:
     if isinstance(pid, bool) or not isinstance(pid, int) or pid <= 0:
         return False
     try:
@@ -215,7 +216,7 @@ def process_exists(pid: Any) -> bool:
     return True
 
 
-def valid_wait_record(payload: dict[str, Any]) -> bool:
+def valid_wait_record(payload: JsonObject) -> bool:
     return (
         isinstance(payload.get("wait_id"), str)
         and WAIT_ID_PATTERN.fullmatch(payload["wait_id"]) is not None
@@ -229,7 +230,7 @@ def valid_wait_record(payload: dict[str, Any]) -> bool:
     )
 
 
-def load_wait(root: Path, wait_id: str) -> dict[str, Any] | None:
+def load_wait(root: Path, wait_id: str) -> JsonObject | None:
     if WAIT_ID_PATTERN.fullmatch(wait_id) is None:
         return None
     record = read_json(request_path(root, wait_id))
@@ -238,9 +239,9 @@ def load_wait(root: Path, wait_id: str) -> dict[str, Any] | None:
     return record
 
 
-def list_pending_waits(root: Path) -> list[dict[str, Any]]:
+def list_pending_waits(root: Path) -> list[JsonObject]:
     ensure_control_root(root)
-    records: list[dict[str, Any]] = []
+    records: list[JsonObject] = []
     for path in root.glob("wait_*.request.json"):
         record = read_json(path)
         if record is None or not valid_wait_record(record):
@@ -257,7 +258,7 @@ def list_pending_waits(root: Path) -> list[dict[str, Any]]:
     return records
 
 
-def register_wait(root: Path, thread_id: str, comment: str | None = None) -> dict[str, Any]:
+def register_wait(root: Path, thread_id: str, comment: str | None = None) -> JsonObject:
     ensure_control_root(root)
     thread_id = thread_id.strip()
     if not thread_id:
@@ -281,7 +282,7 @@ def register_wait(root: Path, thread_id: str, comment: str | None = None) -> dic
     return record
 
 
-def browser_wait_record(record: dict[str, Any]) -> dict[str, Any]:
+def browser_wait_record(record: JsonObject) -> JsonObject:
     return {
         "wait_id": record["wait_id"],
         "thread_id": record["thread_id"],
@@ -786,7 +787,7 @@ def wait_for_instruction(
     thread_id: str,
     comment: str | None = None,
     cancellation_event: threading.Event | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     if cancellation_event is not None and cancellation_event.is_set():
         raise AwaitInstructionCancelled
 

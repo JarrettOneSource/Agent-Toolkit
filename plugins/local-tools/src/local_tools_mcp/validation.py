@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Any
+
+from .json_types import JsonObject, JsonValue
 
 MAX_SECONDS = 7 * 24 * 60 * 60
 
@@ -25,7 +26,7 @@ DEFAULT_MONITOR_TAIL_LINES = 20
 MAX_MONITOR_TAIL_LINES = 200
 
 
-def parse_arguments(arguments: Any) -> dict[str, Any]:
+def parse_arguments(arguments: JsonValue) -> JsonObject:
     if arguments is None:
         return {}
     if not isinstance(arguments, dict):
@@ -34,7 +35,7 @@ def parse_arguments(arguments: Any) -> dict[str, Any]:
 
 
 def parse_seconds(
-    value: Any,
+    value: JsonValue,
     *,
     default: float | None = None,
     field: str = "seconds",
@@ -56,7 +57,7 @@ def parse_seconds(
     return seconds
 
 
-def parse_int(value: Any, *, default: int, field: str, minimum: int = 0, maximum: int = 1000) -> int:
+def parse_int(value: JsonValue, *, default: int, field: str, minimum: int = 0, maximum: int = 1000) -> int:
     if value is None:
         return default
     if isinstance(value, bool) or not isinstance(value, int):
@@ -66,7 +67,7 @@ def parse_int(value: Any, *, default: int, field: str, minimum: int = 0, maximum
     return value
 
 
-def parse_string(value: Any, *, default: str | None = None, field: str) -> str:
+def parse_string(value: JsonValue, *, default: str | None = None, field: str) -> str:
     if value is None:
         if default is None:
             raise ValueError(f"{field} is required")
@@ -76,7 +77,7 @@ def parse_string(value: Any, *, default: str | None = None, field: str) -> str:
     return value
 
 
-def parse_bool(value: Any, *, default: bool, field: str) -> bool:
+def parse_bool(value: JsonValue, *, default: bool, field: str) -> bool:
     if value is None:
         return default
     if not isinstance(value, bool):
@@ -84,7 +85,7 @@ def parse_bool(value: Any, *, default: bool, field: str) -> bool:
     return value
 
 
-def parse_env(value: Any) -> dict[str, str] | None:
+def parse_env(value: JsonValue) -> dict[str, str] | None:
     if value is None:
         return None
     if not isinstance(value, dict):
@@ -101,7 +102,7 @@ def parse_env(value: Any) -> dict[str, str] | None:
     return env
 
 
-def resolve_cwd(value: Any) -> str:
+def resolve_cwd(value: JsonValue) -> str:
     cwd = parse_string(value, default=DEFAULT_CWD, field="cwd")
     path = Path(cwd).expanduser()
     if not path.is_absolute():
@@ -114,11 +115,11 @@ def resolve_cwd(value: Any) -> str:
     return str(path)
 
 
-def parse_job_id(arguments: dict[str, Any]) -> str:
+def parse_job_id(arguments: JsonObject) -> str:
     return parse_string(arguments.get("job_id"), field="job_id")
 
 
-def parse_command_tool_args(arguments: Any) -> dict[str, Any]:
+def parse_command_tool_args(arguments: JsonValue) -> JsonObject:
     args = parse_arguments(arguments)
     return {
         "command": parse_string(args.get("command"), field="command"),

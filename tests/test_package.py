@@ -15,6 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PackageTests(unittest.TestCase):
+    def test_quality_gate_measures_nested_function_complexity(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "nested.py"
+            path.write_text(
+                "def outer(value):\n    def inner():\n" + "        assert value\n" * 23 + "    return inner\n"
+            )
+            self.assertEqual(quality.measurements(path)[1], 24)
+
     def test_quality_gate_rejects_excessive_function_complexity(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -100,10 +108,14 @@ class PackageTests(unittest.TestCase):
             main = json.loads((ROOT / f"plugins/agent-toolkit/.{client}-plugin/plugin.json").read_text())
             self.assertNotIn("mcpServers", main)
         self.assertFalse((ROOT / "plugins/agent-toolkit/.mcp.json").exists())
-        mcp = json.loads((ROOT / "plugins/local-tools/.mcp.json").read_text())["mcpServers"]["local_tools"]
+        mcp = json.loads((ROOT / "plugins/local-tools/.codex-plugin/plugin.json").read_text())["mcpServers"][
+            "local_tools"
+        ]
         self.assertEqual(mcp["command"], "python3")
         self.assertEqual(mcp["tool_timeout_sec"], 604800)
         self.assertEqual(mcp["omit_tools_from"], ["code_mode", "deferred"])
+        self.assertEqual(mcp["args"], ["scripts/run.py"])
+        self.assertEqual(mcp["cwd"], ".")
 
     def test_mcp_entry_point_can_list_tools_without_package_installation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
