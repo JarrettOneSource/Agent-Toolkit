@@ -1,0 +1,22 @@
+{
+  "name": "local-tools",
+  "version": "0.1.0",
+  "description": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
+  "author": {
+    "name": "JarrettOneSource",
+    "url": "https://github.com/JarrettOneSource"
+  },
+  "homepage": "https://github.com/JarrettOneSource/Agent-Toolkit",
+  "repository": "https://github.com/JarrettOneSource/Agent-Toolkit",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Local Tools",
+    "shortDescription": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
+    "longDescription": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
+    "developerName": "JarrettOneSource",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Help me use Local Tools."
+  },
+  "mcpServers": "./.mcp.json"
+}

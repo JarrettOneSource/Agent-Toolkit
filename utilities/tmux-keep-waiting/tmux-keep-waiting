@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+set -u
+
+tmux_bin=$(command -v tmux) || { printf 'tmux is required on PATH.\n' >&2; exit 1; }
+session=${TMUX_KEEP_WAIT_SESSION-}
+poll_interval=${TMUX_KEEP_WAIT_INTERVAL:-0.5}
+run_once=false
+
+if [[ -n ${TMUX_KEEP_WAIT_SOCKET-} ]]; then
+    sockets=("$TMUX_KEEP_WAIT_SOCKET")
+else
+    sockets=("${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/default")
+    if [[ -n ${TMUX-} && ${TMUX%%,*} != "${sockets[0]}" ]]; then
+        sockets+=("${TMUX%%,*}")
+    fi
+fi
+
+if [[ $# == 1 && $1 == --once ]]; then
+    run_once=true
+elif [[ $# -ne 0 ]]; then
+    printf 'Usage: %s [--once]\n' "$0" >&2
+    exit 2
+fi
+
+declare -A last_action=()
+
+is_wait_prompt() {
+    local screen=$1
+
+    if [[ $screen == *"Our systems are thinking a bit more about this request before responding."* &&
+          $screen == *"1. Dismiss and keep waiting"* &&
+          $screen == *"2. Learn more"* &&
+          $screen == *"No action is required. Codex will keep waiting"* ]]; then
+        return 0
+    fi
+
+    [[ $screen == *"1. Retry with a faster model"* &&
+       $screen == *"3. Learn more"* ]] || return
+
+    if [[ $screen == *"Additional safety checks"* &&
+          $screen == *"This request requires additional safety checks"* &&
+          $screen == *"2. Keep waiting"* &&
+          $screen == *"Press enter to confirm or esc to go back"* ]]; then
+        return 0
+    fi
+
+    [[ $screen == *"Our systems are thinking a bit more about this request before responding."* &&
+       $screen == *"Hang tight or retry with a faster model"* &&
+       $screen == *"2. Dismiss and keep waiting"* &&
+       $screen == *"No action is required. Codex will keep waiting"* ]]
+}
+
+choose_keep_waiting() {
+    local socket=$1
+    local pane=$2
+    local action_key=$socket:$pane
+    local screen move_key
+    local selection_pattern=$'(^|\n)[[:blank:]]*› [1-3][.] (Retry with a faster model|Dismiss and keep waiting|Keep waiting|Learn more)[[:blank:]]*($|\n)'
+
+    screen=$("$tmux_bin" -S "$socket" capture-pane -p -J -t "$pane" 2>/dev/null) || return
+    is_wait_prompt "$screen" || return
+
+    [[ $screen =~ $selection_pattern ]] || return
+    case ${BASH_REMATCH[2]} in
+        "Retry with a faster model") move_key=Down ;;
+        "Keep waiting"|"Dismiss and keep waiting") move_key= ;;
+        "Learn more") move_key=Up ;;
+        *) return ;;
+    esac
+
+    if [[ -n $move_key ]]; then
+        "$tmux_bin" -S "$socket" send-keys -t "$pane" "$move_key" || return
+        sleep 0.1
+
+        screen=$("$tmux_bin" -S "$socket" capture-pane -p -J -t "$pane" 2>/dev/null) || return
+        is_wait_prompt "$screen" || return
+        [[ $screen =~ $selection_pattern ]] || return
+        [[ ${BASH_REMATCH[2]} == "Keep waiting" ||
+           ${BASH_REMATCH[2]} == "Dismiss and keep waiting" ]] || return
+    fi
+
+    last_action["$action_key"]=$SECONDS
+    "$tmux_bin" -S "$socket" send-keys -t "$pane" Enter || return
+    printf '%s selected Keep waiting in pane %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$pane"
+}
+
+while :; do
+    for socket in "${sockets[@]}"; do
+        [[ -S $socket ]] || continue
+
+        if [[ -n $session ]]; then
+            panes=$("$tmux_bin" -S "$socket" list-panes -s -t "$session" \
+                -F '#{pane_id} #{pane_in_mode} #{pane_dead}' 2>/dev/null) || panes=
+        else
+            panes=$("$tmux_bin" -S "$socket" list-panes -a \
+                -F '#{pane_id} #{pane_in_mode} #{pane_dead}' 2>/dev/null) || panes=
+        fi
+
+        while read -r pane in_mode dead; do
+            [[ -n ${pane-} && $in_mode == 0 && $dead == 0 ]] || continue
+            action_key=$socket:$pane
+            (( SECONDS - ${last_action[$action_key]:--10} >= 3 )) || continue
+            choose_keep_waiting "$socket" "$pane"
+        done <<< "$panes"
+    done
+
+    $run_once && exit 0
+    sleep "$poll_interval"
+done

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "local-tools-mcp"
+version = "0.8.0"
+description = "Dependency-free stdio MCP server for local shell jobs and long blocking waits."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+local-tools-mcp = "local_tools_mcp.server:main"
+local-tools-mcp-dashboard = "local_tools_mcp.await_instruction:dashboard_main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

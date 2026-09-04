@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Desloppification"
+  short_description: "Remove AI slop from code and copy changes"
+  default_prompt: "Use $ai-desloppification to tighten this change to the smallest correct implementation."

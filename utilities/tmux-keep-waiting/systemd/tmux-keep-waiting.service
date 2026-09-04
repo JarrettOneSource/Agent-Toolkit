@@ -1,0 +1,11 @@
+[Unit]
+Description=Select Keep waiting at Codex wait prompts in tmux
+
+[Service]
+Type=simple
+ExecStart=%h/bin/tmux-keep-waiting
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=default.target

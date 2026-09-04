@@ -1,0 +1,19 @@
+{
+  "name": "agent-toolkit",
+  "owner": {
+    "name": "JarrettOneSource"
+  },
+  "plugins": [
+    {
+      "name": "agent-toolkit",
+      "source": "./plugins/agent-toolkit"
+    },
+    {
+      "name": "local-tools",
+      "source": "./plugins/local-tools"
+    }
+  ],
+  "metadata": {
+    "description": "Engineering skills, working instructions, and optional local utilities."
+  }
+}
