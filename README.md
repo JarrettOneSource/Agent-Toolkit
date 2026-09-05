@@ -2,7 +2,9 @@
 
 Working instructions, engineering skills, and optional local utilities for coding agents. The toolkit favors clear code, proactive cleanup, root-cause fixes, and complete implementations.
 
-The main plugin includes [AGENTS.md](AGENTS.md), three custom skills, and 18 involved skills from Matt Pocock's collection, with their supporting files and licenses.
+The main plugin includes [AGENTS.md](AGENTS.md), three custom skills, and 17 skills adapted from Matt Pocock's collection, with their supporting files and licenses.
+
+The guide uses task-specific acceptance checks and bounded cleanup. Coverage, mutation results, complexity, and file size inform review; the toolkit adds no universal numerical targets or routine approval steps.
 
 [Ponytail core](plugins/ponytail/README.md) is a separate, instruction-only plugin for choosing the smallest complete solution. It retains the upstream decision ladder without the modes, hooks, scoreboards, status line, or extra commands.
 

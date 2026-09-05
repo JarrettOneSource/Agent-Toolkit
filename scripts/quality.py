@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure the authored Python code's size and implementation complexity."""
+"""Report authored Python size and complexity for review without imposing thresholds."""
 
 import ast
 from pathlib import Path
@@ -28,14 +28,11 @@ def main() -> int:
     paths = sorted((root / "plugins/local-tools").glob("src/**/*.py"))
     paths += sorted((root / "plugins/local-tools/scripts").glob("*.py"))
     paths += sorted((root / "scripts").glob("*.py"))
-    failures = 0
     print("File | Lines | Cyclomatic | Cognitive | Halstead difficulty")
     for path in paths:
         lines, cyclomatic, cognitive, difficulty = measurements(path)
         print(f"{path.relative_to(root)} | {lines} | {cyclomatic} | {cognitive} | {difficulty:.2f}")
-        if lines >= 1000 or cyclomatic >= 22 or cognitive >= 22 or difficulty >= 80:
-            failures += 1
-    return int(failures > 0)
+    return 0
 
 
 if __name__ == "__main__":

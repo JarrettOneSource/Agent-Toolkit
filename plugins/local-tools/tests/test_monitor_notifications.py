@@ -1,5 +1,6 @@
 import json
 import os
+import shlex
 import subprocess
 import tempfile
 import threading
@@ -118,16 +119,29 @@ class MonitorNotificationTests(unittest.TestCase):
             ),
             mock.patch.object(monitoring, "queue_codex_message", side_effect=capture_queue),
         ):
-            result = monitoring.monitor_tool(
-                {
-                    "command": "printf 'initial\\n'; sleep 0.2; printf 'update\\n'; sleep 0.4",
-                    "cwd": str(self.root),
-                    "startup_wait_seconds": 0.5,
-                },
-                {"threadId": "thread-monitor"},
-            )
-            job_id = result["structuredContent"]["job"]["job_id"]
-            self.assertTrue(terminal_delivery.wait(3), "terminal monitor notification was not queued")
+            release = self.root / "release"
+            try:
+                result = monitoring.monitor_tool(
+                    {
+                        "command": (
+                            "printf 'initial\\n'; "
+                            f"while [ ! -e {shlex.quote(str(release))} ]; do sleep 0.01; done; "
+                            "printf 'update\\n'"
+                        ),
+                        "cwd": str(self.root),
+                        "startup_wait_seconds": 3,
+                        "max_runtime_seconds": 10,
+                    },
+                    {"threadId": "thread-monitor"},
+                )
+                job_id = result["structuredContent"]["job"]["job_id"]
+                initial = result["structuredContent"]["combined_tail"]
+                self.assertEqual(initial["total_lines"], 1)
+                self.assertTrue(initial["lines"][0].endswith(" stdout: initial"))
+                self.assertEqual(queued, [])
+            finally:
+                release.touch()
+                self.assertTrue(terminal_delivery.wait(3), "terminal monitor notification was not queued")
 
         self._wait_for_notification_state(job_id, "finished")
         self.assertEqual(len(queued), 1)
@@ -165,22 +179,30 @@ class MonitorNotificationTests(unittest.TestCase):
                 terminal_delivery.set()
 
         with mock.patch.object(monitoring, "queue_codex_message", side_effect=capture_queue):
-            result = monitoring.monitor_tool(
-                {
-                    "command": (
-                        "printf 'initial\\n'; sleep 0.15; "
-                        "printf 'first update\\n'; sleep 0.15; "
-                        "printf 'second update\\n'; sleep 0.15; "
-                        "printf 'third update\\n'; sleep 0.15"
-                    ),
-                    "cwd": str(self.root),
-                    "startup_wait_seconds": 0.5,
-                    "tail_lines": 2,
-                },
-                {"threadId": "thread-monitor"},
-            )
-            job_id = result["structuredContent"]["job"]["job_id"]
-            self.assertTrue(terminal_delivery.wait(3), "terminal monitor notification was not queued")
+            release = self.root / "release"
+            try:
+                result = monitoring.monitor_tool(
+                    {
+                        "command": (
+                            "printf 'initial\\n'; "
+                            f"while [ ! -e {shlex.quote(str(release))} ]; do sleep 0.01; done; "
+                            "printf 'first update\\nsecond update\\nthird update\\n'"
+                        ),
+                        "cwd": str(self.root),
+                        "startup_wait_seconds": 3,
+                        "max_runtime_seconds": 10,
+                        "tail_lines": 2,
+                    },
+                    {"threadId": "thread-monitor"},
+                )
+                job_id = result["structuredContent"]["job"]["job_id"]
+                initial = result["structuredContent"]["combined_tail"]
+                self.assertEqual(initial["total_lines"], 1)
+                self.assertTrue(initial["lines"][0].endswith(" stdout: initial"))
+                self.assertEqual(queued, [])
+            finally:
+                release.touch()
+                self.assertTrue(terminal_delivery.wait(3), "terminal monitor notification was not queued")
 
         self._wait_for_notification_state(job_id, "finished")
         self.assertEqual(len(queued), 1)

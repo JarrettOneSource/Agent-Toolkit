@@ -1,67 +1,32 @@
 ---
-name: "recursive-planning"
-description: "Autonomous planning and execution for large multi-step tasks. Uses Codex goal tracking when available, decomposes the task into a full TODO list in the harness, executes every item, then re-scans and builds a new TODO list for residuals. Repeats until the task is fully complete. Does not stop or ask for input mid-execution. Final output is a completion report."
+name: recursive-planning
+description: Plan and execute substantial multi-step work with explicit acceptance criteria, scoped verification, and a final review. Use when a task has dependencies or spans sessions; keep planning proportional and stop when the requested outcome is verified.
 ---
 
 # Recursive Planning
 
-When this skill is active, you are an execution engine. Your job is to decompose the task into work items, execute every one of them, and keep going until the task is fully done. Do not stop to summarize, ask questions, or report intermediate progress. See the work through to completion.
+Carry the requested work through to a verified result. Keep the plan useful for execution and bounded by the user's objective.
 
-## Goal Tracking
+## Define the outcome
 
-At the start of a recursive-planning run, use Codex's goal functionality when it is available: create a goal that matches the user's objective before decomposition begins. If a goal already exists, continue under that goal instead of creating a duplicate. During residual sweeps, compare the remaining work against the active goal. Mark the goal complete only after the final sweep finds no actionable residual work, or after all remaining blockers are genuinely outside the environment.
+- Identify the requested behavior, explicit exclusions, and evidence needed for acceptance.
+- Inspect enough of the affected system to choose the next concrete step. Add investigation tasks for unresolved dependencies; do not require exhaustive exploration before implementation.
+- Build a task list whose items produce reviewable results. Use as many items as the dependencies need, without a preferred count or a task for every incidental edit.
+- Use available task tracking. Create a persistent goal only when the user or host instructions authorize it, and reuse a goal only when it tracks this objective. Bookkeeping must not block otherwise valid work.
 
-## Phase 1 — Decompose
+## Execute and adapt
 
-Before writing any code or making any changes, build the full TODO list.
+- Complete one coherent slice, verify it, then advance. Keep status accurate: splitting a task does not complete its unfinished work.
+- Add findings that are necessary for the requested outcome. Put unrelated or disproportionate improvements on a follow-up list rather than making them new acceptance requirements.
+- Replan when evidence changes the approach. Preserve completed work and do not rerun unchanged stages merely to refresh progress markers.
+- Give concise updates about findings, decisions, and blockers. Resolve routine choices from existing context and authorization; ask only for a missing decision or access that materially affects the next step. Continue independent work while waiting.
 
-1. Read, search, and investigate everything relevant to the task.
-2. Create a task list in the harness using the task tools. Every item must be:
-   - Concrete and scoped to a specific file, function, module, endpoint, test, or artifact.
-   - Independently completable — finishing it produces a visible result.
-   - Verifiable — there is a clear way to confirm it is done.
-3. If there are unknowns, create investigation tasks for them. Do not bury unknowns inside broader items.
-4. Prefer many precise items over few vague ones. A 30-item plan is better than a 5-item plan with hidden complexity.
+## Review and stop
 
-Bad items: "Refactor auth", "Fix issues", "Update tests"
-Good items: "Extract token refresh logic from `src/auth/session.ts:handleRefresh` into a standalone function", "Add test for expired-token path in `tests/auth.test.ts`", "Update OpenAPI spec for the new `/v2/verify` response shape"
+Review the final diff, affected callers, tests, docs, and configuration. Fix residual defects that prevent the requested outcome or invalidate its verification.
 
-## Phase 2 — Execute
+Repeat the relevant checks after those fixes. Broaden the review only when a failure or new risk warrants it; do not restart a whole-project sweep simply because the current list is complete.
 
-Work the list from top to bottom.
+Finish when the acceptance criteria are met, the required checks pass, and no known issue prevents delivery of the requested result. Report useful follow-ups separately. If required work is externally blocked, state what is incomplete and what would unblock it; do not label blocked work or its goal complete.
 
-- Mark each task `in_progress` when you start it. Mark it `completed` when done.
-- Keep only one task `in_progress` at a time.
-- If a task turns out to be larger than expected, mark it completed and add narrower replacement tasks for the remaining work. Do not leave tasks half-done.
-- If you discover new work that must be done, add it as new tasks immediately. Do not defer.
-- Do not stop to report progress. Do not ask the user questions. Do not summarize what you just did. Just keep executing.
-
-## Phase 3 — Residual Sweep
-
-When every task is marked completed, you are not done yet.
-
-1. Re-scan the codebase, tests, docs, logs, and any artifacts you touched.
-2. Look for anything still broken, incomplete, inconsistent, untested, or TODO-marked.
-3. Build a new task list in the harness for every residual issue found.
-4. Immediately begin executing this new list. Same rules as Phase 2.
-
-This sweep is mandatory. Skip it and the task is not done.
-
-## Phase 4 — Repeat Or Finish
-
-After executing the residual task list, run Phase 3 again.
-
-Keep cycling through Phase 3 → Phase 4 until one of these is true:
-- The residual sweep finds zero new issues.
-- The only remaining items are things that genuinely cannot be resolved in this environment (missing credentials, external service dependencies, runtime-only behaviors).
-
-When you reach that point, the task is done.
-
-## Final Output
-
-Your final message to the user should be a short completion report:
-- State that the task is done.
-- List the major things that were accomplished.
-- If anything remains unresolvable, state exactly what and why.
-
-Do not give this report until all phases are complete. Do not give intermediate reports.
+The final response should state the result, the evidence actually obtained, and any material limitation. Completing a task does not require exhausting every possible improvement to the project.

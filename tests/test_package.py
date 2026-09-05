@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import re
@@ -6,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -15,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PackageTests(unittest.TestCase):
-    def test_quality_gate_measures_nested_function_complexity(self) -> None:
+    def test_complexity_report_measures_nested_functions(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "nested.py"
             path.write_text(
@@ -23,7 +25,7 @@ class PackageTests(unittest.TestCase):
             )
             self.assertEqual(quality.measurements(path)[1], 24)
 
-    def test_quality_gate_rejects_excessive_function_complexity(self) -> None:
+    def test_complexity_report_does_not_enforce_unconfigured_thresholds(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             scripts = root / "scripts"
@@ -31,11 +33,15 @@ class PackageTests(unittest.TestCase):
             source = "def excessive(value):\n"
             source += "".join(f"    if value == {number}:\n        return {number}\n" for number in range(23))
             (scripts / "fixture.py").write_text(source)
+            output = io.StringIO()
             with (
                 mock.patch.object(quality, "__file__", str(scripts / "quality.py")),
-                mock.patch("builtins.print"),
+                redirect_stdout(output),
             ):
-                self.assertEqual(quality.main(), 1)
+                self.assertEqual(quality.main(), 0)
+            row = output.getvalue().splitlines()[1].split(" | ")
+            self.assertEqual(row[0], "scripts/fixture.py")
+            self.assertEqual(int(row[2]), 24)
 
     def test_release_versions_guidance_and_resources_are_complete(self) -> None:
         self.assertEqual(sync_package.synchronize(ROOT, check=True), [])

@@ -1,4 +1,4 @@
 interface:
   display_name: "Full-Send Implementation"
   short_description: "End-to-end clean implementation discipline"
-  default_prompt: "Use $implement-full-send to implement the clean, recommended solution end-to-end with root-cause fixes, no fallbacks, and cohesive file structure."
+  default_prompt: "Use $implement-full-send to implement the clean, recommended solution end-to-end with root-cause fixes, complete cutovers, and clear ownership."

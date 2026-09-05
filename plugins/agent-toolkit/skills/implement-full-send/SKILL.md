@@ -1,59 +1,36 @@
 ---
 name: implement-full-send
-description: Apply strict implementation discipline for coding tasks where the user wants the clean, recommended solution end-to-end instead of incremental patches. Use when Codex should do a full cutover, avoid fallbacks and backwards compatibility layers, debug to root cause, keep new functionality enabled by default, split growing monoliths into cohesive files when appropriate, remove features with complete scoped cleanup, and clean up touched code before finishing.
+description: Deliver a clean implementation end-to-end. Use for full cutovers, root-cause fixes, complete removals, or changes that need coordinated callers and cohesive ownership. Avoid unnecessary transitional paths while preserving the user's scope and existing contracts.
 ---
 
 # Implement Full Send
 
-Use this skill when the user wants the code changed the right way, not merely made to pass. Favor the intended end state, complete cutover, and maintainable structure over temporary compatibility layers or defensive clutter.
+Deliver the intended end state, including the callers and lifecycle behavior needed to make it work.
 
-## Plan To The Size Of The Work
+## Plan to the size of the work
 
-- Implement small changes end-to-end without stopping for a large planning phase.
-- Propose a minimal implementation plan before coding larger features or structural work.
-- Include the target structure, ownership boundaries, extension points, and cutover path in that plan.
-- Stop and confirm scope with the user before proceeding if the correct solution requires significant refactoring beyond the apparent request.
+Handle small changes directly. For substantial work, identify the target structure, ownership, dependencies, and acceptance checks before editing.
 
-## Implement The Intended End State
+Routine fixes and restructuring within existing authorization can proceed. Ask only when an unresolved product choice, external action, or material scope expansion needs the user's decision. Do not repeat approvals already given.
 
-- Implement the clean, recommended solution fully instead of layering on transitional code.
-- Complete the cutover instead of leaving old and new paths active together.
-- Keep new functionality enabled by default unless the user explicitly asks for a flag or staged rollout.
-- Refuse to add environment-variable gating, compatibility shims, or fallback behavior by default.
-- Remove superseded code paths when the new design replaces them.
+## Complete the change
 
-## Remove Features Surgically
+- Use one canonical implementation and update affected callers in the same change.
+- Remove superseded paths, aliases, wiring, types, tests, docs, and configuration when the replacement or removal is authorized.
+- Preserve compatibility required by the user or an established contract. Do not invent fallback paths or compatibility layers for hypothetical consumers.
+- Enable requested functionality by default unless a flag or staged rollout is requested or required by the agreed deployment plan.
+- Handle genuine boundary failures without hiding defects behind speculative retries, broad exception handling, or silent defaults.
 
-- When removing a feature, remove it cleanly and completely instead of disabling it or leaving dead paths behind.
-- Keep cleanup scoped to the removed feature and its direct integration points.
-- Make the removal surgical and thorough: delete the implementation, wiring, types, tests, docs, and references that exist only for that feature.
-- Avoid opportunistic cleanup outside the removal scope unless it is required to keep the system correct.
+## Keep ownership clear
 
-## Structure Code Deliberately
+Keep related state and invariants together. Extract cohesive responsibilities when it reduces coupling or necessary complexity; keep short, single-use logic inline when clearer. File size alone does not determine the right module boundary.
 
-- Keep files small, cohesive, and easy to navigate.
-- Decide explicitly whether a growing file must remain a single file.
-- Keep a necessary single file organized with clear sections, extracted helpers, and local types.
-- Split a file into a folder of smaller files when responsibilities are separable.
-- Prefer clear ownership boundaries over convenience dumping grounds.
+For a substantial split, explain the target files and cutover. Move each responsibility with its private helpers and types, and remove the old definitions after updating their callers.
 
-## Debug To Root Cause
+## Fix and verify
 
-- Find the root cause before choosing a fix.
-- For a persistent problem, add robust debug logs or equivalent instrumentation to narrow the failure and observe the real behavior.
-- Pinpoint and confirm the exact source of the bug before fixing it. Do not guess.
-- State briefly why the chosen fix works.
-- If an attempted fix fails, undo it, clean up any debugging or partial changes that are no longer needed, and try again from a different angle.
-- Avoid band-aids that only mask symptoms or preserve flawed behavior.
+Establish the cause of a defect from a reproduction, focused test, trace, or other concrete evidence. Use targeted instrumentation when needed and remove unsuccessful attempts before trying a different fix. State any limit on what the evidence proves.
 
-## Avoid Legacy Baggage
+Verify the changed behavior and meaningful failure paths using the repository's existing checks. Follow explicit project acceptance gates; do not add universal numerical targets or tests that only make metrics look complete.
 
-- Avoid fallbacks, backwards compatibility layers, and legacy-preservation work unless the user explicitly requires them.
-- Prefer one correct path over multiple partially supported paths.
-- Treat "support both" as a scope increase that requires explicit user direction.
-
-## Finish Cleanly
-
-- Clean up touched code before finishing.
-- Remove dead branches, stale helpers, unused types, and obvious structural leftovers created during the work.
-- Leave the final state consistent with the new implementation approach, not halfway migrated.
+Finish with a review of the affected code, callers, and artifacts. Resolve defects necessary for the requested outcome, record broader improvements separately, and stop once the agreed result and its checks are complete.

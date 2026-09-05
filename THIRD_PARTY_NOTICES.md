@@ -4,7 +4,7 @@
 
 The skills identified in [SOURCES.json](SOURCES.json) are derived from [mattpocock/skills](https://github.com/mattpocock/skills), revision `ed37663cc5fbef691ddfecd080dff42f7e7e350d`. Copyright 2026 Matt Pocock. The full MIT license is preserved in [the plugin package](plugins/agent-toolkit/licenses/Matt-Pocock-MIT.txt).
 
-The toolkit includes the locally installed definitions and supporting files. Codex display metadata and toolkit working instructions are local additions. Imported manual-only flags are removed so the plugin's skills can be selected automatically when relevant. The `qa` skill comes from the upstream deprecated directory and is included because the installed tracker-setup guidance refers to it.
+The toolkit includes adapted definitions and supporting files. Codex display metadata and toolkit working instructions are local additions. The TDD, diagnosis, and ticket-implementation guidance is adapted to use established interfaces without routine approval prompts and to keep investigation and verification proportional to the task. Invocation policies are retained per skill. The `qa` skill comes from the upstream deprecated directory and is included because the installed tracker-setup guidance refers to it.
 
 `recursive-planning`, `ai-desloppification`, and `implement-full-send` are custom toolkit skills. They are not attributed to Matt Pocock.
 

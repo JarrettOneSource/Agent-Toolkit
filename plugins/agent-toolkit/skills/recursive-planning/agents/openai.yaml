@@ -1,4 +1,4 @@
 interface:
   display_name: "Recursive Planning"
-  short_description: "Detailed iterative planning for large multi-step work"
-  default_prompt: "Use $recursive-planning for large, long-running, multi-step tasks that need a specific plan, active execution, and an explicit reassessment/replan step before declaring completion."
+  short_description: "Plan, execute, and verify a bounded task"
+  default_prompt: "Use $recursive-planning to define acceptance criteria, execute the necessary work, and verify the result without expanding into unrelated improvements."
