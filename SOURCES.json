@@ -9,7 +9,6 @@
     "revision": "ed37663cc5fbef691ddfecd080dff42f7e7e350d",
     "license": "MIT",
     "skills": {
-      "code-review": "skills/engineering/code-review",
       "codebase-design": "skills/engineering/codebase-design",
       "diagnosing-bugs": "skills/engineering/diagnosing-bugs",
       "domain-modeling": "skills/engineering/domain-modeling",

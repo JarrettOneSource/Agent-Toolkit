@@ -1,6 +1,6 @@
 {
   "name": "local-tools",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Optional local shell jobs, bounded logs, an instruction dashboard, and Codex completion callbacks.",
   "author": {
     "name": "JarrettOneSource",
