@@ -108,6 +108,10 @@ elif command == 'send-keys':
     def test_capacity_error_sends_continue(self) -> None:
         self.assertEqual(self.run_scan([CAPACITY]), ["continue", "Enter"])
 
+    def test_capacity_error_without_a_goal_sends_continue(self) -> None:
+        screen = CAPACITY.replace("Goal stalled (/goal resume)", "Allow saves across game versions") + "\n\n"
+        self.assertEqual(self.run_scan([screen]), ["continue", "Enter"])
+
     def test_unchanged_capacity_error_is_submitted_only_once(self) -> None:
         self.assertEqual(self.run_scan([CAPACITY], scans=3), ["continue", "Enter"])
 

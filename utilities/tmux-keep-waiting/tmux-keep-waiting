@@ -60,7 +60,7 @@ handle_pane() {
     local selection_pattern=$'(^|\n)[[:blank:]]*› [1-3][.] (Retry with a faster model|Dismiss and keep waiting|Keep waiting|Learn more)[[:blank:]]*($|\n)'
 
     screen=$("$tmux_bin" -S "$socket" capture-pane -p -J -t "$pane" 2>/dev/null) || return
-    local capacity_pattern=$'(^|\n)⚠ Selected model is at capacity[.] Please try a different model[.]\n[[:space:]]*› (Ask Codex to do anything)?[[:blank:]]*\n[[:space:]]*[^\n]*Goal stalled [(]/goal resume[)][[:blank:]]*$'
+    local capacity_pattern=$'(^|\n)⚠ Selected model is at capacity[.] Please try a different model[.]\n[[:space:]]*› (Ask Codex to do anything)?[[:blank:]]*\n[[:space:]]*[^\n]*[[:space:]]*$'
     local is_capacity=false
     [[ $screen =~ $capacity_pattern ]] && is_capacity=true
     $is_capacity || capacity_handled["$action_key"]=0

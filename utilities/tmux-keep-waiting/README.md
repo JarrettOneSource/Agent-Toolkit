@@ -5,7 +5,7 @@ shows a waiting menu inside tmux. Supports the two-option menu where waiting is
 option 1 and the older three-option menus where waiting is option 2.
 
 When Codex shows “Selected model is at capacity” immediately above an empty chat
-prompt and reports “Goal stalled (/goal resume)”, the watcher sends `continue`.
+prompt, the watcher sends `continue`, with or without an active goal.
 It sends once while that error remains on screen and rearms after the screen changes.
 Draft messages and errors followed by newer transcript output are left untouched.
 
