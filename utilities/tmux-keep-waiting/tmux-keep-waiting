@@ -24,6 +24,7 @@ elif [[ $# -ne 0 ]]; then
 fi
 
 declare -A last_action=()
+declare -A capacity_handled=()
 
 is_wait_prompt() {
     local screen=$1
@@ -51,7 +52,7 @@ is_wait_prompt() {
        $screen == *"No action is required. Codex will keep waiting"* ]]
 }
 
-choose_keep_waiting() {
+handle_pane() {
     local socket=$1
     local pane=$2
     local action_key=$socket:$pane
@@ -59,6 +60,22 @@ choose_keep_waiting() {
     local selection_pattern=$'(^|\n)[[:blank:]]*› [1-3][.] (Retry with a faster model|Dismiss and keep waiting|Keep waiting|Learn more)[[:blank:]]*($|\n)'
 
     screen=$("$tmux_bin" -S "$socket" capture-pane -p -J -t "$pane" 2>/dev/null) || return
+    local capacity_pattern=$'(^|\n)⚠ Selected model is at capacity[.] Please try a different model[.]\n[[:space:]]*› (Ask Codex to do anything)?[[:blank:]]*\n[[:space:]]*[^\n]*Goal stalled [(]/goal resume[)][[:blank:]]*$'
+    local is_capacity=false
+    [[ $screen =~ $capacity_pattern ]] && is_capacity=true
+    $is_capacity || capacity_handled["$action_key"]=0
+    (( SECONDS - ${last_action[$action_key]:--10} >= 3 )) || return
+    if $is_capacity; then
+        [[ ${capacity_handled[$action_key]:-0} == 0 ]] || return
+        "$tmux_bin" -S "$socket" send-keys -t "$pane" -l continue || return
+        # Let Codex finish grouping incoming text before submitting it.
+        sleep 0.3
+        "$tmux_bin" -S "$socket" send-keys -t "$pane" Enter || return
+        capacity_handled["$action_key"]=1
+        last_action["$action_key"]=$SECONDS
+        printf '%s sent continue after capacity error in pane %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$pane"
+        return
+    fi
     is_wait_prompt "$screen" || return
 
     [[ $screen =~ $selection_pattern ]] || return
@@ -99,9 +116,7 @@ while :; do
 
         while read -r pane in_mode dead; do
             [[ -n ${pane-} && $in_mode == 0 && $dead == 0 ]] || continue
-            action_key=$socket:$pane
-            (( SECONDS - ${last_action[$action_key]:--10} >= 3 )) || continue
-            choose_keep_waiting "$socket" "$pane"
+            handle_pane "$socket" "$pane"
         done <<< "$panes"
     done
 

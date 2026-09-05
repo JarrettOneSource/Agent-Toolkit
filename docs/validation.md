@@ -4,8 +4,8 @@ Validated on Linux with Codex 0.153.3, Claude Code 2.1.261, and Python 3.11.15. 
 
 ## Functional checks
 
-- 57 tests pass locally: 20 packaging/watcher/client checks and 37 Local Tools checks. The native Codex check is skipped when the CLI is unavailable.
-- The watcher selected the waiting option in a real, isolated tmux pane. Fixture-driven checks cover navigation, rechecking a changed screen, copy mode, dead panes, current-socket discovery, and leaving permission dialogs untouched.
+- 63 tests pass locally: 26 packaging/watcher/client checks and 37 Local Tools checks. The native Codex check is skipped when the CLI is unavailable.
+- The watcher selected the waiting option and submitted `continue` for a stalled capacity error in real, isolated tmux panes. Regression checks cover duplicate suppression, rearming after activity, stale errors, and draft preservation. Fixture-driven checks cover navigation, rechecking a changed screen, copy mode, dead panes, current-socket discovery, and leaving permission dialogs untouched.
 - Local Tools tests exercise stdio protocol handling, multiple dashboard clients, cancellation, process lifecycle, log cursors, monitor callbacks, and host timezone/DST formatting.
 - Both plugins install and uninstall successfully under isolated Codex and Claude configuration directories.
 - Codex's native `skills/list` discovers all 21 namespaced skills from the installed package. A native Codex thread starts the installed Local Tools server and discovers all ten tools. Direct stdio execution also works without a package installation.

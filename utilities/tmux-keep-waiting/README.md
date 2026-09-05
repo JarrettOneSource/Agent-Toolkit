@@ -4,6 +4,11 @@ Automatically select **Keep waiting** or **Dismiss and keep waiting** when Codex
 shows a waiting menu inside tmux. Supports the two-option menu where waiting is
 option 1 and the older three-option menus where waiting is option 2.
 
+When Codex shows “Selected model is at capacity” immediately above an empty chat
+prompt and reports “Goal stalled (/goal resume)”, the watcher sends `continue`.
+It sends once while that error remains on screen and rearms after the screen changes.
+Draft messages and errors followed by newer transcript output are left untouched.
+
 The watcher scans panes every 0.5 seconds, checks the selected menu row, moves to
 the waiting option when needed, and presses Enter. After moving, it checks the
 screen again before submitting. It skips dead panes and panes in copy mode, with

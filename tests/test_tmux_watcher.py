@@ -26,6 +26,13 @@ This request requires additional safety checks
 Press enter to confirm or esc to go back
 """
 
+CAPACITY = """⚠ Selected model is at capacity. Please try a different model.
+
+› Ask Codex to do anything
+
+  gpt-6-astra max · Goal stalled (/goal resume)
+"""
+
 
 class WatcherTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -60,7 +67,7 @@ elif command == 'send-keys':
         binary.chmod(0o755)
 
     def run_scan(
-        self, screens: list[str], *, pane: str = "%1 0 0", current_socket: bool = False
+        self, screens: list[str], *, pane: str = "%1 0 0", current_socket: bool = False, scans: int = 1
     ) -> list[str]:
         (self.root / "scenario.json").write_text(json.dumps({"screens": screens, "pane": pane}))
         environment = dict(
@@ -72,16 +79,50 @@ elif command == 'send-keys':
         if current_socket:
             environment.pop("TMUX_KEEP_WAIT_SOCKET")
             environment["TMUX"] = f"{self.socket_path},1,0"
-        subprocess.run(
-            [BASH, str(WATCHER), "--once"],
-            env=environment,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=5,
-        )
+        command = [BASH, str(WATCHER)]
+        if scans == 1:
+            subprocess.run(
+                [*command, "--once"], env=environment, capture_output=True, text=True, check=True, timeout=5
+            )
+        else:
+            environment["TMUX_KEEP_WAIT_INTERVAL"] = "0.05"
+            process = subprocess.Popen(
+                command, env=environment, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            try:
+                deadline = time.monotonic() + 8
+                captures = self.root / "captures"
+                while time.monotonic() < deadline:
+                    if captures.exists() and int(captures.read_text() or "0") >= scans:
+                        break
+                    time.sleep(0.02)
+                else:
+                    self.fail("Watcher did not complete the requested scans")
+                time.sleep(3.1)
+            finally:
+                process.terminate()
+                process.communicate(timeout=3)
         path = self.root / "keys"
         return path.read_text().splitlines() if path.exists() else []
+
+    def test_capacity_error_sends_continue(self) -> None:
+        self.assertEqual(self.run_scan([CAPACITY]), ["continue", "Enter"])
+
+    def test_unchanged_capacity_error_is_submitted_only_once(self) -> None:
+        self.assertEqual(self.run_scan([CAPACITY], scans=3), ["continue", "Enter"])
+
+    def test_new_capacity_error_after_activity_is_submitted(self) -> None:
+        self.assertEqual(
+            self.run_scan([CAPACITY, "• Working", CAPACITY], scans=3),
+            ["continue", "Enter", "continue", "Enter"],
+        )
+
+    def test_old_capacity_error_is_untouched(self) -> None:
+        screen = CAPACITY.replace("\n\n›", "\n\n• Working again\n\n›")
+        self.assertEqual(self.run_scan([screen]), [])
+
+    def test_capacity_error_with_user_draft_is_untouched(self) -> None:
+        self.assertEqual(self.run_scan([CAPACITY.replace("Ask Codex to do anything", "my draft")]), [])
 
     def test_selected_wait_option_is_submitted(self) -> None:
         self.assertEqual(self.run_scan([TWO_OPTIONS]), ["Enter"])
@@ -118,6 +159,12 @@ elif command == 'send-keys':
 @unittest.skipUnless(Path("/usr/bin/tmux").is_file(), "native tmux is not installed")
 class LiveTmuxTests(unittest.TestCase):
     def test_wait_selection_reaches_a_real_private_tmux_pane(self) -> None:
+        self.check_submission(TWO_OPTIONS, "")
+
+    def test_continue_reaches_a_real_private_tmux_pane(self) -> None:
+        self.check_submission(CAPACITY, "continue")
+
+    def check_submission(self, screen: str, expected: str) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             socket_path = root / "tmux.socket"
@@ -125,8 +172,8 @@ class LiveTmuxTests(unittest.TestCase):
             menu = root / "menu.sh"
             menu.write_text(
                 "#!/bin/bash\nprintf '%s' "
-                + shlex.quote(TWO_OPTIONS)
-                + "\nIFS= read -r answer\nprintf 'waiting' > "
+                + shlex.quote(screen)
+                + '\nIFS= read -r answer\nprintf "%s" "$answer" > '
                 + shlex.quote(str(receipt))
                 + "\nsleep 20\n"
             )
@@ -155,10 +202,10 @@ class LiveTmuxTests(unittest.TestCase):
                         text=True,
                         check=True,
                     )
-                    if "No action is required" in capture.stdout:
+                    if screen.strip() in capture.stdout:
                         break
                     time.sleep(0.02)
-                self.assertIn("No action is required", capture.stdout)
+                self.assertIn(screen.strip(), capture.stdout)
                 environment = dict(os.environ, PATH="/usr/bin:/bin", TMUX_KEEP_WAIT_SOCKET=str(socket_path))
                 subprocess.run(
                     [BASH, str(WATCHER), "--once"],
@@ -170,7 +217,7 @@ class LiveTmuxTests(unittest.TestCase):
                 deadline = time.monotonic() + 2
                 while not receipt.exists() and time.monotonic() < deadline:
                     time.sleep(0.02)
-                self.assertEqual(receipt.read_text(), "waiting")
+                self.assertEqual(receipt.read_text(), expected)
             finally:
                 subprocess.run([*command, "kill-server"], capture_output=True)
 
