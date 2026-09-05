@@ -4,6 +4,8 @@ Working instructions, engineering skills, and optional local utilities for codin
 
 The main plugin includes [AGENTS.md](AGENTS.md), three custom skills, and 18 involved skills from Matt Pocock's collection, with their supporting files and licenses.
 
+[Ponytail core](plugins/ponytail/README.md) is a separate, instruction-only plugin for choosing the smallest complete solution. It retains the upstream decision ladder without the modes, hooks, scoreboards, status line, or extra commands.
+
 ## Codex
 
 With Codex CLI 0.153.3 or later:
@@ -38,10 +40,11 @@ Open `/plugin` and select **Marketplaces → agent-toolkit → Enable auto-updat
 
 Invoke a skill as `/agent-toolkit:recursive-planning`. The startup hook directs Claude to the same bundled instructions.
 
-## Optional utilities
+## Optional plugins and utilities
 
 | Utility | Purpose | Installation |
 | --- | --- | --- |
+| [Ponytail core](plugins/ponytail/README.md) | Reuse-first coding guidance with no added runtime or hooks | Install `ponytail@agent-toolkit`. |
 | [Local Tools](plugins/local-tools/README.md) | Local shell jobs, logs, an instruction dashboard, and Codex completion callbacks | Install `local-tools@agent-toolkit`. Requires Python 3.11+ and a POSIX host. |
 | [tmux waiting-menu watcher](utilities/tmux-keep-waiting/README.md) | Select **Keep waiting** in recognized Codex waiting menus | Run or install the standalone script. Requires Bash 4+ and tmux. |
 
@@ -55,7 +58,7 @@ Manual copies and local-directory marketplace installs do not receive Git update
 
 ## Maintenance
 
-To uninstall a plugin, run `codex plugin remove agent-toolkit@agent-toolkit` or `claude plugin uninstall agent-toolkit@agent-toolkit`. Use `local-tools@agent-toolkit` for the optional server. Stop the watcher using its documented service command when installed.
+To uninstall a plugin, run `codex plugin remove agent-toolkit@agent-toolkit` or `claude plugin uninstall agent-toolkit@agent-toolkit`. Use `local-tools@agent-toolkit` for the optional server or `ponytail@agent-toolkit` for Ponytail. Stop the watcher using its documented service command when installed.
 
 Edit a working checkout. Client-managed marketplace snapshots and plugin caches can be replaced during updates.
 
@@ -74,4 +77,4 @@ See [distribution research](docs/distribution-research.md) for the source compar
 
 ## License and sources
 
-MIT. Matt Pocock's skills retain their [upstream MIT license](plugins/agent-toolkit/licenses/Matt-Pocock-MIT.txt). [Third-party notices](THIRD_PARTY_NOTICES.md) and [source inventory](SOURCES.json) identify imported material and local adaptations.
+MIT. Matt Pocock's skills retain their [upstream MIT license](plugins/agent-toolkit/licenses/Matt-Pocock-MIT.txt), and Ponytail retains [DietrichGebert's MIT license](plugins/ponytail/LICENSE). [Third-party notices](THIRD_PARTY_NOTICES.md) and [source inventory](SOURCES.json) identify imported material and local adaptations.

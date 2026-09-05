@@ -35,6 +35,10 @@ Maintain project knowledge as part of the work:
 - Keep `CONTEXT.md` a domain glossary. Record an architectural decision only when it captures a real trade-off that is costly to reverse and would surprise a future maintainer without context. Create these documents when there is concrete knowledge to record.
 - Follow existing `docs/agents/` conventions for domain docs, issue tracking, and triage. Use `$setup-matt-pocock-skills` at the actual project root when a tracker-dependent workflow needs missing configuration. Proceed with ordinary coding when these optional documents are absent.
 
+## Ponytail
+
+When the Ponytail plugin is installed, apply `$ponytail:ponytail` to coding work. Read its skill and use the first suitable option: existing code, standard library, native platform feature, installed dependency, then the smallest complete implementation. Preserve requested behavior and the repository's quality requirements.
+
 ## Standing authorization for cleanup
 
 Proactive cleanup is explicitly requested as part of every coding task. Actively fix concrete bugs, slop, brittle code, duplication, dead code, misleading names, and poor organization encountered anywhere in the current project, including pre-existing issues outside the initial diff. Do not wait for a separate cleanup request or ask permission for routine fixes and refactoring.

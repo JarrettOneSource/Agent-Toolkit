@@ -38,5 +38,15 @@
       "repository": "https://github.com/Pernasua/tmux-keep-waiting",
       "revision": "8acf5c091cb15d6635ae278fd3da10443e3b4092"
     }
+  },
+  "ponytail": {
+    "repository": "https://github.com/DietrichGebert/ponytail",
+    "revision": "974d940a1c5344210874150b98ff0d2c861fab6a",
+    "upstream_version": "4.9.0",
+    "license": "MIT",
+    "skills": {
+      "ponytail": "skills/ponytail"
+    },
+    "adaptation": "Instruction-only core; no modes, hooks, status line, auxiliary commands, scoreboards, debt ledger, benchmarks, marketing assets, or other-agent adapters."
   }
 }

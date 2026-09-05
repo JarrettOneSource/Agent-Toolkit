@@ -41,13 +41,22 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(sync_package.synchronize(ROOT, check=True), [])
         subprocess.run([sys.executable, str(ROOT / "scripts/sync_package.py"), "--check"], check=True)
         inventory = json.loads((ROOT / "SOURCES.json").read_text())
-        names = set(inventory["custom_skills"]) | set(inventory["matt_pocock"]["skills"])
-        skills = ROOT / "plugins/agent-toolkit/skills"
-        self.assertEqual(names, {path.name for path in skills.iterdir() if path.is_dir()})
-        direct = set(re.findall(r"\$([a-z][a-z0-9-]+)", (ROOT / "AGENTS.md").read_text()))
-        self.assertLessEqual(direct, names)
-        for name in names:
-            path = skills / name / "SKILL.md"
+        packages = {
+            "agent-toolkit": set(inventory["custom_skills"]) | set(inventory["matt_pocock"]["skills"]),
+            "ponytail": set(inventory["ponytail"]["skills"]),
+        }
+        paths = {}
+        for plugin, names in packages.items():
+            skills = ROOT / "plugins" / plugin / "skills"
+            self.assertEqual(names, {path.name for path in skills.iterdir() if path.is_dir()})
+            paths.update({f"{plugin}:{name}": skills / name / "SKILL.md" for name in names})
+        direct = set(
+            re.findall(r"\$([a-z][a-z0-9-]+(?::[a-z][a-z0-9-]+)?)", (ROOT / "AGENTS.md").read_text())
+        )
+        resolved = {name if ":" in name else f"agent-toolkit:{name}" for name in direct}
+        self.assertLessEqual(resolved, paths.keys())
+        for qualified_name, path in paths.items():
+            name = qualified_name.split(":", 1)[1]
             text = path.read_text()
             self.assertRegex(text, r"(?m)^name:\s*[\"']?" + re.escape(name) + r"[\"']?\s*$")
             prose = re.sub(r"(?ms)^```.*?^```[^\n]*", "", text)
@@ -116,6 +125,16 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(mcp["omit_tools_from"], ["code_mode", "deferred"])
         self.assertEqual(mcp["args"], ["scripts/run.py"])
         self.assertEqual(mcp["cwd"], ".")
+
+    def test_ponytail_adds_only_one_instruction_skill(self) -> None:
+        plugin = ROOT / "plugins/ponytail"
+        for client in ("codex", "claude"):
+            manifest = json.loads((plugin / f".{client}-plugin/plugin.json").read_text())
+            self.assertNotIn("hooks", manifest)
+            self.assertNotIn("mcpServers", manifest)
+        self.assertEqual({path.name for path in (plugin / "skills").iterdir()}, {"ponytail"})
+        for directory in ("hooks", "scripts", "assets", "benchmarks", "node_modules"):
+            self.assertFalse((plugin / directory).exists())
 
     def test_mcp_entry_point_can_list_tools_without_package_installation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
