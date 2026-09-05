@@ -11,6 +11,7 @@ Validated on Linux with Codex 0.153.3, Claude Code 2.1.261, and Python 3.11.15. 
 - Codex's native `skills/list` discovers all 21 namespaced skills from the installed package. A native Codex thread starts the installed Local Tools server and discovers all ten tools. Direct stdio execution also works without a package installation.
 - Both Codex plugin manifests and Claude's plugin/marketplace manifests validate. The packaged guidance, release versions, direct skill references, and linked skill resources are checked together.
 - The optional Ponytail package contains one instruction skill and no runtime hooks, MCP servers, scripts, benchmarks, or marketing assets. Its skill and both client manifests validate.
+- Ponytail was installed from this GitHub marketplace into a real Codex CLI profile and three profile wrappers. Each launcher's native skill catalog reported the skill enabled from its own installed cache, with content matching the repository. Global coding guidance was added to all four profiles; existing configuration values and shared configuration symlinks were preserved.
 
 ## Measurements
 

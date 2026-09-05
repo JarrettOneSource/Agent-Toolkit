@@ -60,6 +60,8 @@ Manual copies and local-directory marketplace installs do not receive Git update
 
 To uninstall a plugin, run `codex plugin remove agent-toolkit@agent-toolkit` or `claude plugin uninstall agent-toolkit@agent-toolkit`. Use `local-tools@agent-toolkit` for the optional server or `ponytail@agent-toolkit` for Ponytail. Stop the watcher using its documented service command when installed.
 
+If you added Ponytail activation to a global `AGENTS.md`, remove that section when uninstalling it.
+
 Edit a working checkout. Client-managed marketplace snapshots and plugin caches can be replaced during updates.
 
 After changing guidance or skills, bump `VERSION` and run:
