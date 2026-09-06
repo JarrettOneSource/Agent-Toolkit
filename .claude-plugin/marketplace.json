@@ -11,10 +11,6 @@
     {
       "name": "local-tools",
       "source": "./plugins/local-tools"
-    },
-    {
-      "name": "ponytail",
-      "source": "./plugins/ponytail"
     }
   ],
   "metadata": {

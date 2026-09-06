@@ -8,12 +8,6 @@ The toolkit includes adapted definitions and supporting files. Codex display met
 
 `recursive-planning`, `ai-desloppification`, and `implement-full-send` are custom toolkit skills. They are not attributed to Matt Pocock.
 
-## Ponytail
-
-[Ponytail core](plugins/ponytail/README.md) is adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail), revision `974d940a1c5344210874150b98ff0d2c861fab6a` (upstream version `4.9.0`). Copyright 2026 DietrichGebert. The [full MIT license](plugins/ponytail/LICENSE) is included.
-
-The adaptation retains the reuse-first decision ladder and correctness constraints. It removes the persona, mode system, lifecycle hooks, status-line setup, scoreboards, debt ledger, auxiliary commands, marketing, benchmarks, and unrelated agent integrations. The wording follows this toolkit's requirements for complete implementations, readable code, and existing test practices.
-
 ## Optional utilities
 
 Local Tools was imported from `JarrettOneSource/local-tools-mcp`. The tmux watcher was imported from `Pernasua/tmux-keep-waiting`. Original commit IDs are recorded in [SOURCES.json](SOURCES.json).

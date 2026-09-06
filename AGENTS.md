@@ -27,8 +27,6 @@ Read the relevant `SKILL.md` before applying a skill. Choose the workflow that f
 | Technical research | `$research` |
 | Session handoff | `$handoff` |
 
-When Ponytail is installed, apply `$ponytail:ponytail` to coding work: reuse existing code, then the standard library, native platform features, installed dependencies, and finally the smallest complete implementation that meets the requirements.
-
 Existing public interfaces are already authorized places for regression tests. Select established approaches autonomously when the evidence is clear. Reserve formal discovery and approval workflows for decisions that actually need them.
 
 ## Implementation
