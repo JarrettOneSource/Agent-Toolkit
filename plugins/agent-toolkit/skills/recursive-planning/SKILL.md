@@ -1,6 +1,6 @@
 ---
 name: recursive-planning
-description: Plan and execute substantial multi-step work with explicit acceptance criteria, scoped verification, and a final review. Use when a task has dependencies or spans sessions; keep planning proportional and stop when the requested outcome is verified.
+description: "Plan and execute work with substantial dependencies or session handoffs through defined acceptance checks."
 ---
 
 # Recursive Planning

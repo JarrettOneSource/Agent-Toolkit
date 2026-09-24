@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Companion"
+  short_description: "Get a focused second opinion from Claude"
+  default_prompt: "Use $claude-companion to get Claude's perspective on this decision while retaining implementation and verification ownership."

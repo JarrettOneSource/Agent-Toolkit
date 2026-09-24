@@ -1,6 +1,6 @@
 ---
 name: implement-full-send
-description: Deliver a clean implementation end-to-end. Use for full cutovers, root-cause fixes, complete removals, or changes that need coordinated callers and cohesive ownership. Avoid unnecessary transitional paths while preserving the user's scope and existing contracts.
+description: "Complete coordinated implementations, cutovers, removals, or root-cause fixes across affected callers."
 ---
 
 # Implement Full Send

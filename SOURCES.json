@@ -1,32 +1,81 @@
 {
   "custom_skills": [
+    "add-distributor",
     "ai-desloppification",
+    "clash-royale-training",
+    "claude-code-cli",
+    "claude-companion",
+    "codex-cli",
+    "diagnose",
+    "discord-report-archive",
+    "ftb-quests-mod-authoring",
+    "genericclient-development",
+    "genericclient-skill-evolution",
+    "ghidra-binary-analysis",
     "implement-full-send",
-    "recursive-planning"
+    "ml-debugging",
+    "ml-experiment-skill-evolution",
+    "osrs-pvp-training",
+    "personal-phone",
+    "recursive-planning",
+    "solomon-dark-live-memory-re",
+    "solomon-dark-ml-training",
+    "solomon-dark-native-parity-re",
+    "to-issues",
+    "to-prd",
+    "zoom-out"
   ],
   "matt_pocock": {
     "repository": "https://github.com/mattpocock/skills",
-    "revision": "ed37663cc5fbef691ddfecd080dff42f7e7e350d",
+    "revision": "3cca18b368ae95cdbdebbff572ccafa662551015",
     "license": "MIT",
     "skills": {
+      "ask-matt": "skills/engineering/ask-matt",
+      "claude-handoff": "skills/in-progress/claude-handoff",
+      "code-review": "skills/engineering/code-review",
       "codebase-design": "skills/engineering/codebase-design",
       "diagnosing-bugs": "skills/engineering/diagnosing-bugs",
       "domain-modeling": "skills/engineering/domain-modeling",
+      "git-guardrails-claude-code": "skills/misc/git-guardrails-claude-code",
+      "grill-me": "skills/productivity/grill-me",
       "grill-with-docs": "skills/engineering/grill-with-docs",
       "grilling": "skills/productivity/grilling",
       "handoff": "skills/productivity/handoff",
       "implement": "skills/engineering/implement",
       "improve-codebase-architecture": "skills/engineering/improve-codebase-architecture",
+      "loop-me": "skills/in-progress/loop-me",
+      "migrate-to-shoehorn": "skills/misc/migrate-to-shoehorn",
       "prototype": "skills/engineering/prototype",
-      "qa": "skills/deprecated/qa",
       "research": "skills/engineering/research",
+      "resolving-merge-conflicts": "skills/engineering/resolving-merge-conflicts",
+      "scaffold-exercises": "skills/misc/scaffold-exercises",
       "setup-matt-pocock-skills": "skills/engineering/setup-matt-pocock-skills",
+      "setup-pre-commit": "skills/misc/setup-pre-commit",
+      "setup-ts-deep-modules": "skills/in-progress/setup-ts-deep-modules",
       "tdd": "skills/engineering/tdd",
+      "teach": "skills/productivity/teach",
+      "to-questionnaire": "skills/productivity/to-questionnaire",
       "to-spec": "skills/engineering/to-spec",
       "to-tickets": "skills/engineering/to-tickets",
       "triage": "skills/engineering/triage",
-      "wayfinder": "skills/engineering/wayfinder"
-    }
+      "wait-what": "skills/productivity/wait-what",
+      "wayfinder": "skills/engineering/wayfinder",
+      "wizard": "skills/engineering/wizard",
+      "writing-beats": "skills/in-progress/writing-beats",
+      "writing-for-agents": "skills/productivity/writing-for-agents",
+      "writing-fragments": "skills/in-progress/writing-fragments",
+      "writing-shape": "skills/in-progress/writing-shape"
+    },
+    "legacy_skills": {
+      "batch-grill-me": "skills/in-progress/batch-grill-me",
+      "design-an-interface": "skills/deprecated/design-an-interface",
+      "edit-article": "skills/personal/edit-article",
+      "obsidian-vault": "skills/personal/obsidian-vault",
+      "qa": "skills/deprecated/qa",
+      "request-refactor-plan": "skills/deprecated/request-refactor-plan",
+      "ubiquitous-language": "skills/deprecated/ubiquitous-language"
+    },
+    "legacy_revision": "ed37663cc5fbef691ddfecd080dff42f7e7e350d"
   },
   "utilities": {
     "local-tools": {
@@ -37,5 +86,14 @@
       "repository": "https://github.com/Pernasua/tmux-keep-waiting",
       "revision": "8acf5c091cb15d6635ae278fd3da10443e3b4092"
     }
+  },
+  "forward_implementation_first": {
+    "repository": "https://github.com/Vuk97/forward-implementation-first",
+    "revision": "2d4dd7eacb4c41a31d85501f6f44d33fef21017a",
+    "license": "MIT",
+    "skills": [
+      "forward-implementation-first"
+    ],
+    "adaptation": "Installed task-scope safeguards and optional execution-profile reference retained."
   }
 }

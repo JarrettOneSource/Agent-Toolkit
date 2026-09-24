@@ -1,0 +1,4 @@
+interface:
+  display_name: "Solomon Dark Native Parity RE"
+  short_description: "Deep-RE stock mechanics into the web port"
+  default_prompt: "Use $solomon-dark-native-parity-re to deeply recover and implement this stock mechanic in the web port:"

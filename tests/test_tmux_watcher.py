@@ -45,8 +45,9 @@ class WatcherTests(unittest.TestCase):
         self.addCleanup(listener.close)
         binary = self.root / "bin/tmux"
         binary.parent.mkdir()
+        # This stdlib-only fixture should start as cheaply as the native tmux command.
         binary.write_text(
-            f"#!{sys.executable}\n"
+            f"#!{sys.executable} -S\n"
             + """import json, os, sys
 from pathlib import Path
 root = Path(os.environ['TOOLKIT_WATCHER_TEST_ROOT'])

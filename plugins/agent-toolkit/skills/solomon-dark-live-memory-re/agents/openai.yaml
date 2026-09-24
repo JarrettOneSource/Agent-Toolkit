@@ -1,0 +1,4 @@
+interface:
+  display_name: "Solomon Dark Live RE"
+  short_description: "Use the repo's Lua exec and sd.debug for live game-data RE."
+  default_prompt: "Use $solomon-dark-live-memory-re to inspect the Solomon Dark repo and debug or reverse engineer runtime game data in real time."

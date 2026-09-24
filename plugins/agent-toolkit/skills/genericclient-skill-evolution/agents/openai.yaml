@@ -1,0 +1,4 @@
+interface:
+  display_name: "GenericClient Skill Evolution"
+  short_description: "Evolve GenericClient guidance from run evidence"
+  default_prompt: "Use $genericclient-skill-evolution to consolidate recent GenericClient runs and gate one evidence-backed skill improvement."

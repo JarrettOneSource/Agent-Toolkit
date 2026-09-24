@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Test-driven development for features, bug fixes, and integration behavior. Use when the user requests tests first or a behavior change benefits from a failing regression scenario. Test through stable interfaces and keep the process proportional to the risk.
+description: "Use test-first development for requested features, fixes, or integration behavior that benefit from a failing regression test."
 ---
 
 # Test-Driven Development
@@ -14,6 +14,8 @@ Read relevant domain context and architectural decisions so the tests use the pr
 A test should exercise observable behavior through a stable public interface: an API, module boundary, command, or user flow. Prefer the existing interface that reaches the actual behavior without exposing private implementation details.
 
 Routine regression tests at established interfaces are already authorized. Choose them from the request, callers, and existing tests. Ask the user only when the expected behavior or a consequential new interface is unclear; do not require approval for each test location.
+
+For a consequential interface design question, consult [codebase-design](../codebase-design/SKILL.md) for module and boundary vocabulary.
 
 ## Work in slices
 

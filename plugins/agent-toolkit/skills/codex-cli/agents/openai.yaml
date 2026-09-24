@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex CLI"
+  short_description: "Operate Codex CLI sessions safely"
+  default_prompt: "Use $codex-cli to start, resume, fork, or parallelize Codex CLI sessions correctly."

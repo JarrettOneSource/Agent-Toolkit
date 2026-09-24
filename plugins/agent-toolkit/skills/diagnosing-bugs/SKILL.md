@@ -1,11 +1,13 @@
 ---
 name: diagnosing-bugs
-description: Diagnose bugs and performance regressions using a repeatable signal, focused hypotheses, and evidence-backed fixes. Use when something is broken, failing, intermittently wrong, or slow; scale the investigation to the uncertainty and impact.
+description: "Investigate bugs and performance regressions using reproducible observations, focused hypotheses, and verified fixes."
 ---
 
 # Diagnosing Bugs
 
 Find and verify the cause of the reported failure. Read the relevant code, domain context, and architectural decisions before choosing a fix.
+
+Keep credentials out of shared commands, output, and captured artifacts. Omit secrets at the producer, use environment variables for authenticated probes, and share only the lines needed to explain the failure.
 
 ## Establish a useful signal
 

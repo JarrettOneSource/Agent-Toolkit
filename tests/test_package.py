@@ -48,7 +48,12 @@ class PackageTests(unittest.TestCase):
         subprocess.run([sys.executable, str(ROOT / "scripts/sync_package.py"), "--check"], check=True)
         inventory = json.loads((ROOT / "SOURCES.json").read_text())
         skills = ROOT / "plugins/agent-toolkit/skills"
-        names = set(inventory["custom_skills"]) | set(inventory["matt_pocock"]["skills"])
+        names = (
+            set(inventory["custom_skills"])
+            | set(inventory["matt_pocock"]["skills"])
+            | set(inventory["matt_pocock"]["legacy_skills"])
+            | set(inventory["forward_implementation_first"]["skills"])
+        )
         self.assertEqual(names, {path.name for path in skills.iterdir() if path.is_dir()})
         paths = {f"agent-toolkit:{name}": skills / name / "SKILL.md" for name in names}
         direct = set(

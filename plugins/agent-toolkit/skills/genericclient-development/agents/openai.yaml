@@ -1,0 +1,4 @@
+interface:
+  display_name: "GenericClient Development"
+  short_description: "Build and live-test GenericClient safely"
+  default_prompt: "Use $genericclient-development to inspect and continue the current GenericClient task from live evidence."

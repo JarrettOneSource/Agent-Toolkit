@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Code CLI"
+  short_description: "Operate Claude Code CLI sessions safely"
+  default_prompt: "Use $claude-code-cli to start, resume, fork, or manage Claude Code CLI sessions correctly."

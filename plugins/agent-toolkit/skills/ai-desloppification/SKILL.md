@@ -1,6 +1,6 @@
 ---
 name: ai-desloppification
-description: Remove unnecessary complexity and filler from code or copy. Use when asked to desloppify, simplify an overengineered change, remove unnecessary abstractions or defensive layers, or tighten user-facing language. Preserve intended behavior and real contracts.
+description: "Simplify overengineered code or tighten copy when cleanup is requested or needed for the current change."
 ---
 
 # AI Desloppification

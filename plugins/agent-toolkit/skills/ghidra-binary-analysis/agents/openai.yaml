@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ghidra RE"
+  short_description: "Headless Ghidra reverse engineering workflow"
+  default_prompt: "Use $ghidra-binary-analysis to inspect this binary with Ghidra, decompile the relevant code, and summarize the recovered constants, control flow, and design logic."

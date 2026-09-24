@@ -1,0 +1,4 @@
+interface:
+  display_name: "Discord Report Archive"
+  short_description: "Archive Discord reports with local text and evidence"
+  default_prompt: "Use $discord-report-archive to collect the requested Discord reports into the local report folder, including related follow-ups and attachments."

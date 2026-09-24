@@ -1,0 +1,4 @@
+interface:
+  display_name: "FTB Quests Mod Authoring"
+  short_description: "Create polished mod-specific FTB Quests chapters."
+  default_prompt: "Use $ftb-quests-mod-authoring to create or improve quests for this mod in the installed Minecraft profile."

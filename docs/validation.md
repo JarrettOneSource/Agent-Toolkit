@@ -1,15 +1,18 @@
 # Validation
 
-Version 0.2.3 was validated on Linux with Codex 0.153.4 and Python 3.12.3. CI runs Python 3.11 and 3.12. Earlier distribution checks also covered Claude Code 2.1.261.
+Version 0.3.0 was validated on Linux with Codex 0.156.1, Claude Code 2.1.281, and Python 3.11.15. CI runs Python 3.11 and 3.12.
 
 ## Functional checks
 
 - 63 tests pass locally: 26 packaging/watcher/client checks and 37 Local Tools checks. The native Codex check is skipped when the CLI is unavailable.
+- Fresh, isolated native installations discover all 67 packaged skills in Codex and Claude Code. Codex reports no skill-loading errors; Claude's component inventory reports the 67 skills and one startup hook. The package retains 24 explicit-invocation frontmatter settings.
+- All 11 imported Python helpers, five shell scripts, and one JavaScript helper pass syntax checks. Project-specific runtime execution, such as Ghidra or model training, is outside this distribution check.
 - The watcher selected the waiting option and submitted `continue` for a stalled capacity error in real, isolated tmux panes. Regression checks cover capacity errors with and without a goal, duplicate suppression, rearming after activity, stale errors, and draft preservation. Fixture-driven checks cover navigation, rechecking a changed screen, copy mode, dead panes, current-socket discovery, and leaving permission dialogs untouched.
 - Local Tools tests exercise stdio protocol handling, multiple dashboard clients, cancellation, process lifecycle, log cursors, monitor callbacks, and host timezone/DST formatting. Monitor tests hold the child after its initial output and release it explicitly, so callback assertions do not depend on a half-second startup race.
 - Earlier distribution checks installed and uninstalled Agent Toolkit and Local Tools under isolated Codex and Claude configuration directories.
 - Earlier native Codex checks discovered all 20 namespaced Agent Toolkit skills from a fresh installation. A native Codex thread starts the installed Local Tools server and discovers all ten tools. Direct stdio execution also works without a package installation.
-- Both Codex plugin manifests pass the plugin validator. Automated packaging checks verify both clients' release versions, packaged guidance, direct skill references, and linked resources.
+- Native plugin installation and Claude manifest validation pass. Automated packaging checks verify both clients' release versions, packaged guidance, direct skill references, and linked resources. The older standalone Codex plugin/skill validators reject the explicit-invocation metadata on 24 skills; the current native clients accept and discover them. Those policies were preserved rather than removed to satisfy the older helper.
+- The watcher test's stdlib-only fake `tmux` starts Python without site initialization. Coverage's subprocess startup instrumentation otherwise delayed this fixture enough to exceed its five-second deadline; the same behavioral checks passed without coverage. Production Python subprocesses remain measured, and the real tmux integration checks still run.
 
 ## Measurements
 
@@ -25,9 +28,9 @@ Run `sh scripts/validate.sh` to reproduce the checks and measurements. Lint, for
 | Maximum Halstead Difficulty | 6.25 |
 | High-confidence Vulture findings | 0 |
 | Explicit `Any` annotations | 0; enforced by Ruff ANN401 |
-| Statement coverage | 83.15% |
-| Branch coverage | 71.15% |
-| Combined statement/branch coverage | 80.31% |
+| Statement coverage | 84.27% |
+| Branch coverage | 72.60% |
+| Combined statement/branch coverage | 81.50% |
 | Packaging synchronization and complexity-report scripts | 100% statement and branch coverage |
 
 The Local Tools implementation has uncovered paths, principally error handling, dashboard requests, and asynchronous lifecycle cases. Coverage identifies further testing opportunities; the toolkit does not impose a universal percentage. Scope additional work to the behavior being changed and the risks it introduces.

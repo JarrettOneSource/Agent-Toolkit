@@ -1,0 +1,4 @@
+interface:
+  display_name: "OSRS PvP Training"
+  short_description: "Run and govern the native OSRS PvP learner"
+  default_prompt: "Use $osrs-pvp-training to inspect the Mac handoff and continue the next authorized OSRS PvP experiment from current evidence."
