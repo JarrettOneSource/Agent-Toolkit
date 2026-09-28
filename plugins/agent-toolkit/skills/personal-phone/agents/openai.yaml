@@ -1,4 +1,0 @@
-interface:
-  display_name: "Personal Phone"
-  short_description: "Place calls and manage phone tasks and transcripts"
-  default_prompt: "Use $personal-phone to call a business for me and report the result."
