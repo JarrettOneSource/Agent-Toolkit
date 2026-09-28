@@ -1,22 +1,34 @@
 ---
 name: ai-desloppification
-description: "Simplify overengineered code or tighten copy when cleanup is requested or needed for the current change."
+description: "Keep implementation and cleanup simple through reuse, disciplined scope, and existing contracts. Use for KISS or reuse requests, overengineered changes, and tightening user-facing copy."
 ---
 
 # AI Desloppification
 
-Make the requested result easier to understand and maintain. The smallest complete solution may require removing more code than it adds.
+Make the requested result easier to understand and maintain. Start with the working system and extend the code that already owns the behavior. The smallest complete solution minimizes new concepts and maintenance burden; it may require removing more code than it adds.
 
 ## Scope and review
 
-1. Inspect the current code or copy, its callers, and the requested behavior.
-2. Identify concrete redundancy, defects, or unnecessary machinery. Respect standing cleanup authorization and explicit exclusions.
-3. Make cohesive corrections that support the task. Record unrelated or costly improvements separately instead of widening every change into a project audit.
-4. Review the resulting behavior and diff, then run the relevant checks.
+1. Establish the requested outcome, explicit exclusions, and any working implementation the user names as the reference. Keep later additions distinct from corrections to the original requirement.
+2. Trace the relevant existing path before designing a replacement: user action, save helper, data access, scheduling, external call, and persisted result as applicable. Inspect neighboring integrations for reusable behavior. Stop once the owners and actual gap are clear; a small change does not require a repository-wide audit.
+3. Identify what the current path cannot do. Reuse or extend its helpers and records before adding a parallel implementation. Compare actual behavior and callers, not just similar names.
+4. Make cohesive corrections that close that gap. Respect standing cleanup authorization; record unrelated improvements separately. Proximity to the touched code, architectural neatness, and "full send" do not expand the task.
+5. Review why each changed file is needed, then verify the resulting user workflow and relevant contracts.
 
 Use the project's acceptance criteria. This skill adds no numerical quality gates. Coverage, mutations, complexity, and size can identify review priorities; none justifies invented contracts, meaningless tests, unsafe casts, removed resilience, or arbitrary file splits. Explain relevant gaps and justified exceptions rather than hiding them.
 
 Routine implementation choices and already-authorized cleanup do not need another approval. Ask when a material behavior, compatibility, data, or scope decision cannot be established from the request and existing contracts.
+
+## Before adding machinery
+
+- For a new query, table, stored procedure, helper, abstraction, flag, or screen, identify the concrete requirement and why the existing owner cannot satisfy it with a simpler extension. This is an implementation decision, not a mandatory document or another approval step.
+- Generalize a proven implementation by removing the assumptions that prevent its reuse. Preserve its useful vocabulary and flow. A configurable district or provider does not by itself require a generic framework, registry, or versioning system.
+- Keep data with the record it describes and editing controls with the existing editor. For example, a mapping to an external location may need one field and a dropdown on the location record; introduce a separate crosswalk system only when the actual relationships or history require it.
+- Preserve established API names, schemas, blank/null semantics, and business rules unless the requested change requires otherwise. Verify new required fields and validation against the real contract or observed system behavior. Implementation convenience is not a business requirement, and guessed defaults must not conceal missing data.
+- Integrate at the existing owner of the business save or lifecycle event when it serves the relevant entry points. Check forms, modals, imports, and background paths as applicable; reuse existing scheduling and delivery mechanisms. Keep a successful business save and its integration outcome distinct where the workflow requires it.
+- New storage or abstractions are appropriate for demonstrated needs such as durable delivery or a real ownership boundary. Choose them for that need; simplicity is not an absolute ban on SQL, helpers, resilience, or justified refactoring.
+
+Architecture documents should reflect the agreed behavior and necessary tradeoffs. Correct an overbuilt proposal rather than implementing unnecessary machinery to fulfill its promises.
 
 ## Code to simplify
 
@@ -32,6 +44,8 @@ Do not add abstractions or rename and move files merely to make the diff look or
 ## Tests
 
 Keep tests that detect an observable regression, contract violation, important failure path, or integration risk. Strengthen assertions when a meaningful mutation survives.
+
+For integrations and UI flows, verify the route users actually take: available inputs, save and reopen, blank selections, automatic execution, and the external result where relevant and authorized. A passing helper test or manually invoked worker does not establish that the normal workflow works. Report source inspection, automated tests, actual submissions, and confirmed external effects separately, including what was not exercised.
 
 Avoid tests that only:
 
@@ -56,8 +70,12 @@ Remove clauses that add no information:
 
 Keep established vocabulary, useful guarantees, and the product's voice. Put each fact where it belongs and say it once. Review changed copy in context.
 
+Status messages should describe the current action and its actual outcome. A queued attempt is not a completed sync, and historical activity should not appear to be a new action.
+
 ## Removal and verification
 
 When removing a feature, field, or output, remove its exclusive implementation, wiring, types, tests, docs, and configuration. Use omission rather than placeholders or replacement explanations unless the user requests them. Remove unwanted output at its producer; add a sanitizer layer only when that is the requested solution.
 
-Before finishing, check affected callers and references, remove obsolete scaffolding, and run the relevant repository checks. Once those checks pass, repeat them only for new changes, failures, or unresolved concerns. Report the concrete cleanup, verification, and any material follow-up work.
+Before finishing, check affected callers and references, remove obsolete scaffolding, and run the relevant repository checks. For each substantive change, be able to name the requested behavior or necessary dependency it serves; remove unrelated churn from the diff. Once checks pass, repeat them only for new changes, failures, or unresolved concerns.
+
+Report the concrete result, verification, and material follow-up work concisely. Distinguish committed code, passing CI, deployed code, and verified runtime behavior. Carry authorized work through the agreed completion point without making the user repeatedly ask to continue.
