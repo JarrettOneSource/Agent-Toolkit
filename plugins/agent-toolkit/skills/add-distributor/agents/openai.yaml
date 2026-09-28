@@ -1,4 +1,0 @@
-interface:
-  display_name: "Add Distributor"
-  short_description: "Add and verify distributor ingestion"
-  default_prompt: "Use $add-distributor to add and verify a new distributor feed."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "ML Experiment Skill Evolution"
-  short_description: "Evolve ML training procedures from run evidence"
-  default_prompt: "Use $ml-experiment-skill-evolution to consolidate one project's experiment history and gate one procedural improvement."

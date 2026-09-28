@@ -1,4 +1,0 @@
-interface:
-  display_name: "Solomon Dark ML Training"
-  short_description: "Train and evaluate the learned Solomon Dark bot"
-  default_prompt: "Use $solomon-dark-ml-training to inspect the current Mac experiment and continue the next authorized bot-training or evaluation step."

@@ -2,11 +2,13 @@
 
 Version 0.3.0 was validated on Linux with Codex 0.156.1, Claude Code 2.1.281, and Python 3.11.15. CI runs Python 3.11 and 3.12.
 
+Version 0.4.0 removed twelve project-specific skills and changed no Python or shell sources. Its packaging, skill inventory, native installation, and helper syntax checks were repeated with Codex 0.158.0, Claude Code 2.1.283, and Python 3.12.13. The remaining results below were measured at 0.3.0.
+
 ## Functional checks
 
 - 63 tests pass locally: 26 packaging/watcher/client checks and 37 Local Tools checks. The native Codex check is skipped when the CLI is unavailable.
-- Fresh, isolated native installations discover all 67 packaged skills in Codex and Claude Code. Codex reports no skill-loading errors; Claude's component inventory reports the 67 skills and one startup hook. The package retains 24 explicit-invocation frontmatter settings.
-- All 11 imported Python helpers, five shell scripts, and one JavaScript helper pass syntax checks. Project-specific runtime execution, such as Ghidra or model training, is outside this distribution check.
+- Fresh, isolated native installations discover all 55 packaged skills in Codex and Claude Code. Codex reports no skill-loading errors; Claude's component inventory reports the 55 skills and one startup hook. The package retains 24 explicit-invocation frontmatter settings.
+- All 10 imported Python helpers, six shell scripts, and one JavaScript helper pass syntax checks. Tool-specific runtime execution, such as Ghidra, is outside this distribution check.
 - The watcher selected the waiting option and submitted `continue` for a stalled capacity error in real, isolated tmux panes. Regression checks cover capacity errors with and without a goal, duplicate suppression, rearming after activity, stale errors, and draft preservation. Fixture-driven checks cover navigation, rechecking a changed screen, copy mode, dead panes, current-socket discovery, and leaving permission dialogs untouched.
 - Local Tools tests exercise stdio protocol handling, multiple dashboard clients, cancellation, process lifecycle, log cursors, monitor callbacks, and host timezone/DST formatting. Monitor tests hold the child after its initial output and release it explicitly, so callback assertions do not depend on a half-second startup race.
 - Earlier distribution checks installed and uninstalled Agent Toolkit and Local Tools under isolated Codex and Claude configuration directories.

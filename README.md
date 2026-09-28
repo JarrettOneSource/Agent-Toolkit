@@ -2,7 +2,7 @@
 
 Working instructions, engineering skills, and optional local utilities for coding agents. The toolkit favors clear code, proactive cleanup, root-cause fixes, and complete implementations.
 
-The main plugin includes [AGENTS.md](AGENTS.md) and 67 skills covering engineering, CLI workflows, project development, research, and writing, with their supporting files and licenses. [SOURCES.json](SOURCES.json) records the custom skills and upstream adaptations.
+The main plugin includes [AGENTS.md](AGENTS.md) and 55 skills covering engineering, CLI workflows, research, and writing, with their supporting files and licenses. [SOURCES.json](SOURCES.json) records the custom skills and upstream adaptations.
 
 The guide uses task-specific acceptance checks and bounded cleanup. Coverage, mutation results, complexity, and file size inform review; the toolkit adds no universal numerical targets or routine approval steps.
 
@@ -44,7 +44,7 @@ Invoke a skill as `/agent-toolkit:recursive-planning`. The startup hook directs 
 
 Install the marketplace and plugin through each profile's wrapper. Profiles with a separate `CODEX_HOME` or `CLAUDE_CONFIG_DIR` have their own plugin settings and caches. For example, repeat the Codex commands with `codex-onesource`, or the Claude commands with `claude-onesource`.
 
-Skills retain their installed invocation policies, including skills that require an explicit request. Project skills describe existing workflows; installing them does not install Ghidra, game clients, phone or Discord adapters, or their credentials. Resolve tool and project paths on the current host. Edit a maintained checkout when updating a skill, then publish and refresh the plugin; edits to client caches are disposable.
+Skills retain their installed invocation policies, including skills that require an explicit request. Tool skills describe existing workflows; installing them does not install Ghidra, phone adapters, or their credentials. Resolve tool and project paths on the current host. Edit a maintained checkout when updating a skill, then publish and refresh the plugin; edits to client caches are disposable.
 
 ## Optional plugins and utilities
 

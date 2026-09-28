@@ -1,4 +1,0 @@
-interface:
-  display_name: "ML Debugging"
-  short_description: "Inspect models and verify learning pipelines"
-  default_prompt: "Use $ml-debugging to diagnose this ML failure or validate the affected learning path with the smallest relevant checks."

@@ -16,10 +16,8 @@ architecture alternatives, an unexplained failure, or non-obvious downstream
 effects. State what decision the answer should help make. Routine edits,
 unfamiliar code, and completed steps do not each require a consultation.
 
-Honor the user's requested cadence and project restrictions. In OSRS PvP work,
-limit consultations to consequential architecture, curriculum, promotion,
-rollback, or statistical-design choices. Do not delegate implementation or
-spawn extra reviewers merely because this skill was loaded.
+Honor the user's requested cadence and project restrictions. Do not delegate
+implementation or spawn extra reviewers merely because this skill was loaded.
 
 ## Run the consultation
 
